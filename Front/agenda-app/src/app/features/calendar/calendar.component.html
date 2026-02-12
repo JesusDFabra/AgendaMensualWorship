@@ -1,0 +1,76 @@
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between">
+    <a routerLink="/"
+       class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+      ← Volver al inicio
+    </a>
+  </div>
+
+  <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-3 shadow-sm">
+    <h1 class="text-xl font-bold text-stone-800 dark:text-stone-100">Calendario de servicios</h1>
+    <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+      Selecciona los días en que habrá servicio. Cada día funciona como un botón: clic para activar o desactivar.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
+      <p>Cargando calendario…</p>
+    </div>
+  } @else {
+    <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
+      <div class="grid grid-cols-3 items-center gap-4 mb-4">
+        <div class="flex justify-start">
+          <button type="button"
+                  (click)="prevMonth()"
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+            ← Anterior
+          </button>
+        </div>
+        <h2 class="text-lg font-semibold text-stone-800 dark:text-stone-100 text-center">{{ monthLabel() }}</h2>
+        <div class="flex justify-end">
+          <button type="button"
+                  (click)="nextMonth()"
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-1 sm:gap-2">
+        @for (w of weekDays; track w) {
+          <div class="text-center text-xs font-medium text-stone-500 dark:text-stone-400 py-1">
+            {{ w }}
+          </div>
+        }
+        @for (cell of calendarGrid(); track (cell.dateStr ?? 'e' + $index)) {
+          @if (cell.day === null) {
+            <div class="aspect-[2/1] rounded-lg bg-stone-50/50 dark:bg-stone-800/30"
+                 aria-hidden="true"></div>
+          } @else {
+            <button type="button"
+                    (click)="toggleDay(cell)"
+                    [disabled]="isUpdating(cell.dateStr)"
+                    [attr.aria-pressed]="!!cell.servicio"
+                    [attr.aria-label]="cell.servicio ? 'Quitar servicio el día ' + cell.day : 'Agregar servicio el día ' + cell.day"
+                    class="aspect-[2/1] rounded-lg text-sm font-medium transition-all min-w-0 flex items-center justify-center
+                           disabled:opacity-50 disabled:cursor-not-allowed
+                           focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900
+                           {{ cell.servicio
+                              ? 'bg-amber-500 dark:bg-amber-500 text-white hover:bg-amber-600 dark:hover:bg-amber-600 shadow-sm'
+                              : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' }}">
+              {{ cell.day }}
+              @if (isUpdating(cell.dateStr)) {
+                <span class="sr-only">Guardando…</span>
+              }
+            </button>
+          }
+        }
+      </div>
+
+      <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
+        Días en amarillo = hay servicio. Clic en un día para activar o desactivar.
+      </p>
+    </section>
+  }
+</div>

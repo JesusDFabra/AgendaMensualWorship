@@ -1,0 +1,137 @@
+<div class="flex flex-col gap-6">
+  @if (!isModal) {
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">Agregar nuevo miembro</h1>
+      <a routerLink="/miembros"
+         class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+        ← Volver al listado
+      </a>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
+      <p>Cargando formulario…</p>
+    </div>
+  } @else {
+    @if (error && !saving) {
+      <div class="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-red-800 dark:text-red-300 text-sm">
+        {{ error }}
+      </div>
+    }
+
+    @if (!loading && !error && (sexos.length === 0 || roles.length === 0)) {
+      <p class="text-sm text-amber-700 dark:text-amber-400">
+        Las listas de Sexo o Rol están vacías. Comprueba que en Supabase las tablas <code class="rounded bg-stone-200 dark:bg-stone-700 px-1">sexo</code> y <code class="rounded bg-stone-200 dark:bg-stone-700 px-1">rol</code> tengan datos.
+      </p>
+    }
+
+    <form (ngSubmit)="submit()"
+          class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm space-y-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label for="nombre" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Nombres <span class="text-red-500">*</span></label>
+          <input id="nombre" type="text" [(ngModel)]="nombre" name="nombre" required
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+        <div>
+          <label for="apellido" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Apellidos <span class="text-red-500">*</span></label>
+          <input id="apellido" type="text" [(ngModel)]="apellido" name="apellido" required
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label for="alias" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Alias</label>
+          <input id="alias" type="text" [(ngModel)]="alias" name="alias"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+        <div>
+          <label for="identificacion" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Identificación <span class="text-red-500">*</span></label>
+          <input id="identificacion" type="text" [(ngModel)]="identificacion" name="identificacion" required
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label for="fecNacimiento" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Fecha de nacimiento <span class="text-red-500">*</span></label>
+          <input id="fecNacimiento" type="date" [(ngModel)]="fecNacimiento" name="fecNacimiento" required
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+        <div>
+          <label for="sexo" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Sexo <span class="text-red-500">*</span></label>
+          <select id="sexo" [(ngModel)]="sexoId" name="sexoId" required
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            <option [ngValue]="null">Seleccione…</option>
+            @for (s of sexos; track s.id) {
+              <option [ngValue]="s.id">{{ s.descripcion }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label for="correo" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Correo</label>
+          <input id="correo" type="email" [(ngModel)]="correo" name="correo"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+        <div>
+          <label for="celular" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Celular</label>
+          <input id="celular" type="tel" [(ngModel)]="celular" name="celular"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label for="rol" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Rol <span class="text-red-500">*</span></label>
+          <select id="rol" [(ngModel)]="rolId" name="rolId" required
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            <option [ngValue]="null">Seleccione…</option>
+            @for (r of roles; track r.id) {
+              <option [ngValue]="r.id">{{ r.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex items-end gap-3 pb-2.5">
+          <label class="flex cursor-pointer items-center gap-2">
+            <input type="checkbox" [(ngModel)]="activo" name="activo"
+                   class="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-600 dark:bg-stone-700">
+            <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Activo</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label for="observaciones" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Observaciones</label>
+        <textarea id="observaciones" [(ngModel)]="observaciones" name="observaciones" rows="3"
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  placeholder="Notas opcionales"></textarea>
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        <button type="submit"
+                [disabled]="saving"
+                class="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-800 disabled:opacity-50">
+          {{ saving ? 'Guardando…' : 'Guardar miembro' }}
+        </button>
+        @if (isModal) {
+          <button type="button"
+                  (click)="cancelled.emit()"
+                  [disabled]="saving"
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-600 transition-colors disabled:opacity-50">
+            Cancelar
+          </button>
+        } @else {
+          <a routerLink="/miembros"
+             class="rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-600 transition-colors">
+            Cancelar
+          </a>
+        }
+      </div>
+    </form>
+  }
+</div>

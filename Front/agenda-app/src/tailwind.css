@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Modo oscuro por clase (toggle manual): aplicar cuando el elemento está dentro de .dark */
+@custom-variant dark (.dark &);
