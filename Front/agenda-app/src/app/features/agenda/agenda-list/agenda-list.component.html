@@ -28,8 +28,10 @@
           </button>
         </div>
         <a [routerLink]="['/agenda', 'mes', currentYear(), currentMonth()]"
-             class="text-lg font-semibold text-stone-800 dark:text-stone-100 text-center hover:text-amber-600 dark:hover:text-amber-400 transition-colors underline-offset-2 hover:underline">
+             class="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-600 bg-amber-50/80 dark:bg-amber-900/20 px-4 py-2.5 text-lg font-semibold text-stone-800 dark:text-stone-100 text-center hover:border-amber-400 hover:bg-amber-100 dark:hover:border-amber-500 dark:hover:bg-amber-900/40 hover:text-amber-700 dark:hover:text-amber-300 transition-all cursor-pointer">
+          <span aria-hidden="true">📅</span>
           {{ monthLabel() }}
+          <span class="text-sm font-medium text-stone-500 dark:text-stone-400"></span>
         </a>
         <div class="flex justify-end">
           <button type="button"
@@ -69,7 +71,7 @@
       </div>
 
       <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
-        Días en naranja = hay servicio (clic para asignar ese día). Clic en el <strong>mes</strong> para ver y programar todo el mes.
+        Días en naranja = hay servicio (clic para asignar los miembros de ese día). Clic en el <strong>mes</strong> para ver y programar todo el mes.
       </p>
     </section>
   }

@@ -9,6 +9,7 @@ export interface Asignacion {
   servicioId: number;
   miembroId: number;
   nombreCompleto: string;
+  alias: string | null;
   rolNombre: string;
   rolId: number | null;
 }

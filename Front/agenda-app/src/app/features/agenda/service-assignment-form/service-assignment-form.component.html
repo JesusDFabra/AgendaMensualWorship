@@ -25,7 +25,8 @@
           <span class="font-medium min-w-0 {{ slot.asignacion ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500 opacity-70' }}">{{ slot.label }}</span>
           <div class="flex flex-wrap items-center justify-center gap-2 min-w-0">
             @if (slot.asignacion) {
-              <span class="text-stone-900 dark:text-stone-100 text-center">{{ slot.asignacion.nombreCompleto }}</span>
+              <span class="text-stone-900 dark:text-stone-100 text-center cursor-help border-b border-dotted border-stone-400 dark:border-stone-500"
+                    [attr.title]="slot.asignacion.nombreCompleto">{{ slot.asignacion.alias || slot.asignacion.nombreCompleto }}</span>
             } @else {
               @if (isSelecting($index)) {
                 <div class="flex flex-wrap items-center justify-center gap-2">

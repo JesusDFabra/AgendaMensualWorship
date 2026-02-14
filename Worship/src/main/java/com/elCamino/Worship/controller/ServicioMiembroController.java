@@ -153,9 +153,10 @@ public class ServicioMiembroController {
     private static AsignacionDto toDto(ServicioMiembro sm) {
         Member m = sm.getMiembro();
         String nombreCompleto = (m.getNombre() != null ? m.getNombre() : "") + " " + (m.getApellido() != null ? m.getApellido() : "").trim();
+        String alias = m.getAlias();
         String rolNombre = m.getRol() != null ? m.getRol().getNombre() : null;
         Long rolId = m.getRol() != null ? m.getRol().getId() : null;
-        return new AsignacionDto(sm.getId(), sm.getServicio().getId(), m.getId(), nombreCompleto.trim(), rolNombre, rolId);
+        return new AsignacionDto(sm.getId(), sm.getServicio().getId(), m.getId(), nombreCompleto.trim(), alias, rolNombre, rolId);
     }
 
     public static final class AsignacionDto {
@@ -163,14 +164,16 @@ public class ServicioMiembroController {
         private Long servicioId;
         private Long miembroId;
         private String nombreCompleto;
+        private String alias;
         private String rolNombre;
         private Long rolId;
 
-        public AsignacionDto(Long id, Long servicioId, Long miembroId, String nombreCompleto, String rolNombre, Long rolId) {
+        public AsignacionDto(Long id, Long servicioId, Long miembroId, String nombreCompleto, String alias, String rolNombre, Long rolId) {
             this.id = id;
             this.servicioId = servicioId;
             this.miembroId = miembroId;
             this.nombreCompleto = nombreCompleto;
+            this.alias = alias;
             this.rolNombre = rolNombre;
             this.rolId = rolId;
         }
@@ -183,6 +186,8 @@ public class ServicioMiembroController {
         public void setMiembroId(Long miembroId) { this.miembroId = miembroId; }
         public String getNombreCompleto() { return nombreCompleto; }
         public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
+        public String getAlias() { return alias; }
+        public void setAlias(String alias) { this.alias = alias; }
         public String getRolNombre() { return rolNombre; }
         public void setRolNombre(String rolNombre) { this.rolNombre = rolNombre; }
         public Long getRolId() { return rolId; }

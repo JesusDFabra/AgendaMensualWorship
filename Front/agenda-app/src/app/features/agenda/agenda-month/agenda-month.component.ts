@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -9,13 +10,13 @@ import { AGENDA_SLOTS } from '../agenda-slots';
 type DayWithAsignaciones = {
   servicio: Servicio;
   asignaciones: Asignacion[];
-  slots: { label: string; nombre: string | null }[];
+  slots: { label: string; nombre: string | null; nombreCompleto: string | null }[];
 };
 
 @Component({
   selector: 'app-agenda-month',
   standalone: true,
-  imports: [RouterLink, ServiceAssignmentFormComponent],
+  imports: [NgClass, RouterLink, ServiceAssignmentFormComponent],
   templateUrl: './agenda-month.component.html',
   styleUrl: './agenda-month.component.scss',
 })
@@ -25,6 +26,10 @@ export class AgendaMonthComponent implements OnInit {
   servicesInMonth = signal<DayWithAsignaciones[]>([]);
   loading = signal(true);
   selectedServicio = signal<Servicio | null>(null);
+  /** Asignaciones ya cargadas del mes; se pasan al modal para no volver a pedirlas. */
+  selectedInitialAsignaciones = signal<Asignacion[] | null>(null);
+  /** True si en el modal se asignó o quitó a alguien; solo entonces recargamos el mes al cerrar. */
+  hasChangesInModal = false;
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -92,20 +97,20 @@ export class AgendaMonthComponent implements OnInit {
     });
   }
 
-  private asignacionesToSlots(list: Asignacion[]): { label: string; nombre: string | null }[] {
+  private asignacionesToSlots(list: Asignacion[]): { label: string; nombre: string | null; nombreCompleto: string | null }[] {
     const voces = list.filter(a => a.rolId === 5);
     let vozIndex = 0;
     return AGENDA_SLOTS.map(({ label, rolId }) => {
-      let nombre: string | null = null;
+      let asignacion: Asignacion | undefined;
       if (rolId === 5) {
-        const a = voces[vozIndex];
+        asignacion = voces[vozIndex];
         vozIndex++;
-        if (a) nombre = a.nombreCompleto;
       } else {
-        const a = list.find(x => x.rolId === rolId);
-        if (a) nombre = a.nombreCompleto;
+        asignacion = list.find(x => x.rolId === rolId);
       }
-      return { label, nombre };
+      const nombre = asignacion ? (asignacion.alias || asignacion.nombreCompleto) : null;
+      const nombreCompleto = asignacion ? asignacion.nombreCompleto : null;
+      return { label, nombre, nombreCompleto };
     });
   }
 
@@ -134,13 +139,22 @@ export class AgendaMonthComponent implements OnInit {
     return `${weekday} ${day}/${month}/${year}`;
   }
 
-  openEdit(servicio: Servicio): void {
-    this.selectedServicio.set(servicio);
+  openEdit(day: DayWithAsignaciones): void {
+    this.selectedServicio.set(day.servicio);
+    this.selectedInitialAsignaciones.set(day.asignaciones);
   }
 
   closeModal(): void {
+    if (this.hasChangesInModal) {
+      this.loadMonth();
+      this.hasChangesInModal = false;
+    }
     this.selectedServicio.set(null);
-    this.loadMonth();
+    this.selectedInitialAsignaciones.set(null);
+  }
+
+  onAsignacionesChanged(): void {
+    this.hasChangesInModal = true;
   }
 
   prevMonth(): void {

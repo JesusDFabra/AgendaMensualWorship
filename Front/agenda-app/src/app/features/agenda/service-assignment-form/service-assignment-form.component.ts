@@ -1,8 +1,10 @@
 import {
   Component,
+  EventEmitter,
   Input,
   OnInit,
   OnChanges,
+  Output,
   SimpleChanges,
   signal,
   computed,
@@ -31,6 +33,10 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   @Input() servicioId!: number;
   @Input() servicio: Servicio | null = null;
   @Input() showHeader = true;
+  /** Si se pasa (p. ej. desde la vista del mes), se usan de inmediato y no se pide la lista al backend. */
+  @Input() initialAsignaciones: Asignacion[] | null = null;
+  /** Se emite cuando el usuario asigna o quita a alguien (para que el padre sepa si recargar). */
+  @Output() asignacionesChanged = new EventEmitter<void>();
 
   servicioResolved = signal<Servicio | null>(null);
   asignaciones = signal<Asignacion[]>([]);
@@ -71,7 +77,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['servicioId'] || changes['servicio']) {
+    if (changes['servicioId'] || changes['servicio'] || changes['initialAsignaciones']) {
       this.resolveServicioAndLoad();
     }
   }
@@ -83,6 +89,11 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     if (this.servicio) {
       this.notFound.set(false);
       this.servicioResolved.set(this.servicio);
+      if (this.initialAsignaciones != null) {
+        this.asignaciones.set(this.initialAsignaciones);
+        this.loading.set(false);
+        return;
+      }
       this.loading.set(false);
       this.loadAsignaciones();
       return;
@@ -145,6 +156,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
         this.loadAsignaciones();
         this.closeSelector();
         this.updating.set(null);
+        this.asignacionesChanged.emit();
       },
       error: () => this.updating.set(null),
     });
@@ -159,6 +171,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
       next: () => {
         this.loadAsignaciones();
         this.updating.set(null);
+        this.asignacionesChanged.emit();
       },
       error: () => this.updating.set(null),
     });
