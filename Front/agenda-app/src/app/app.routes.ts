@@ -27,6 +27,11 @@ export const routes: Routes = [
       import('./features/agenda/agenda-list/agenda-list.component').then((m) => m.AgendaListComponent),
   },
   {
+    path: 'agenda/mes/:year/:month',
+    loadComponent: () =>
+      import('./features/agenda/agenda-month/agenda-month.component').then((m) => m.AgendaMonthComponent),
+  },
+  {
     path: 'agenda/:id',
     loadComponent: () =>
       import('./features/agenda/service-detail/service-detail.component').then((m) => m.ServiceDetailComponent),

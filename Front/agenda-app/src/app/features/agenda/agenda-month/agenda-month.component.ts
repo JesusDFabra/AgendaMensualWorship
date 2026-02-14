@@ -1,0 +1,165 @@
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { ServicioService, Servicio } from '../../../core/services/servicio.service';
+import { AsignacionService, Asignacion } from '../../../core/services/asignacion.service';
+import { ServiceAssignmentFormComponent } from '../service-assignment-form/service-assignment-form.component';
+import { AGENDA_SLOTS } from '../agenda-slots';
+
+type DayWithAsignaciones = {
+  servicio: Servicio;
+  asignaciones: Asignacion[];
+  slots: { label: string; nombre: string | null }[];
+};
+
+@Component({
+  selector: 'app-agenda-month',
+  standalone: true,
+  imports: [RouterLink, ServiceAssignmentFormComponent],
+  templateUrl: './agenda-month.component.html',
+  styleUrl: './agenda-month.component.scss',
+})
+export class AgendaMonthComponent implements OnInit {
+  year = signal(0);
+  month = signal(0);
+  servicesInMonth = signal<DayWithAsignaciones[]>([]);
+  loading = signal(true);
+  selectedServicio = signal<Servicio | null>(null);
+
+  private readonly monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  monthLabel = computed(() => {
+    const m = this.month();
+    const y = this.year();
+    if (!m || !y) return '';
+    return `${this.monthNames[m - 1]} ${y}`;
+  });
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private servicioService: ServicioService,
+    private asignacionService: AsignacionService,
+  ) {}
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      const y = +(params.get('year') ?? 0);
+      const m = +(params.get('month') ?? 0);
+      if (y && m >= 1 && m <= 12) {
+        this.year.set(y);
+        this.month.set(m);
+        this.loadMonth();
+      } else {
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private loadMonth(): void {
+    this.loading.set(true);
+    const y = this.year();
+    const m = this.month();
+    const prefix = `${y}-${m < 10 ? '0' + m : m}-`;
+
+    this.servicioService.getAll().subscribe({
+      next: (all) => {
+        const inMonth = all
+          .filter(s => s.fecha.startsWith(prefix))
+          .sort((a, b) => a.fecha.localeCompare(b.fecha));
+        if (inMonth.length === 0) {
+          this.servicesInMonth.set([]);
+          this.loading.set(false);
+          return;
+        }
+        forkJoin(inMonth.map(s => this.asignacionService.getAsignaciones(s.id))).subscribe({
+          next: (asignacionesArrays) => {
+            const result: DayWithAsignaciones[] = inMonth.map((servicio, i) => ({
+              servicio,
+              asignaciones: asignacionesArrays[i] ?? [],
+              slots: this.asignacionesToSlots(asignacionesArrays[i] ?? []),
+            }));
+            this.servicesInMonth.set(result);
+            this.loading.set(false);
+          },
+          error: () => this.loading.set(false),
+        });
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  private asignacionesToSlots(list: Asignacion[]): { label: string; nombre: string | null }[] {
+    const voces = list.filter(a => a.rolId === 5);
+    let vozIndex = 0;
+    return AGENDA_SLOTS.map(({ label, rolId }) => {
+      let nombre: string | null = null;
+      if (rolId === 5) {
+        const a = voces[vozIndex];
+        vozIndex++;
+        if (a) nombre = a.nombreCompleto;
+      } else {
+        const a = list.find(x => x.rolId === rolId);
+        if (a) nombre = a.nombreCompleto;
+      }
+      return { label, nombre };
+    });
+  }
+
+  /** Nombre del mes (ej. Febrero) */
+  formatMonthName(fecha: string): string {
+    const d = new Date(fecha + 'T12:00:00');
+    return this.monthNames[d.getMonth()];
+  }
+
+  /** Día completo: nombre del día + número (ej. Domingo 15) */
+  formatDayWithWeekday(fecha: string): string {
+    const d = new Date(fecha + 'T12:00:00');
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const day = d.getDate();
+    const weekday = weekdays[d.getDay()];
+    return `${weekday} ${day}`;
+  }
+
+  formatDateLong(fecha: string): string {
+    const d = new Date(fecha + 'T12:00:00');
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const day = d.getDate();
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const weekday = weekdays[d.getDay()];
+    return `${weekday} ${day}/${month}/${year}`;
+  }
+
+  openEdit(servicio: Servicio): void {
+    this.selectedServicio.set(servicio);
+  }
+
+  closeModal(): void {
+    this.selectedServicio.set(null);
+    this.loadMonth();
+  }
+
+  prevMonth(): void {
+    let y = this.year();
+    let m = this.month() - 1;
+    if (m < 1) {
+      m = 12;
+      y--;
+    }
+    this.router.navigate(['/agenda', 'mes', y, m]);
+  }
+
+  nextMonth(): void {
+    let y = this.year();
+    let m = this.month() + 1;
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
+    this.router.navigate(['/agenda', 'mes', y, m]);
+  }
+}

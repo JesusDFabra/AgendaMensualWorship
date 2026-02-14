@@ -1,0 +1,82 @@
+@if (loading()) {
+  <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
+    <p>Cargando…</p>
+  </div>
+} @else if (notFound() || !servicioResolved()) {
+  <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
+    <p>No se encontró el servicio.</p>
+  </div>
+} @else {
+  @if (showHeader) {
+    <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400">
+      <h2 class="text-xl font-bold text-stone-800 dark:text-stone-100">
+        {{ formatDate(servicioResolved()!.fecha) }}
+      </h2>
+      @if (servicioResolved()!.nombre) {
+        <p class="mt-1 text-stone-600 dark:text-stone-300">{{ servicioResolved()!.nombre }}</p>
+      }
+    </header>
+  }
+
+  <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden">
+    <ul class="divide-y divide-stone-200 dark:divide-stone-600">
+      @for (slot of slots(); track slot.label + $index) {
+        <li class="grid grid-cols-[minmax(5rem,auto)_1fr_auto] sm:grid-cols-[minmax(6rem,auto)_1fr_auto] items-center gap-2 p-4 border-l-4 {{ slot.border }} {{ slot.bg }}">
+          <span class="font-medium min-w-0 {{ slot.asignacion ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500 opacity-70' }}">{{ slot.label }}</span>
+          <div class="flex flex-wrap items-center justify-center gap-2 min-w-0">
+            @if (slot.asignacion) {
+              <span class="text-stone-900 dark:text-stone-100 text-center">{{ slot.asignacion.nombreCompleto }}</span>
+            } @else {
+              @if (isSelecting($index)) {
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                  @if (loadingDisponibles()) {
+                    <span class="text-sm text-stone-500 dark:text-stone-400">Cargando…</span>
+                  } @else if (disponibles().length === 0) {
+                    <span class="text-sm text-stone-500 dark:text-stone-400">Nadie disponible con este rol</span>
+                    <button type="button"
+                            (click)="closeSelector()"
+                            class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:underline">
+                      Cerrar
+                    </button>
+                  } @else {
+                    @for (m of disponibles(); track m.id) {
+                      <button type="button"
+                              (click)="assign($index, m)"
+                              [disabled]="updating() !== null"
+                              class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-amber-500 hover:text-white hover:border-amber-500 dark:hover:bg-amber-500 dark:hover:border-amber-500 transition-colors disabled:opacity-50">
+                        {{ memberDisplay(m) }}
+                      </button>
+                    }
+                    <button type="button"
+                            (click)="closeSelector()"
+                            class="text-sm font-medium text-stone-500 dark:text-stone-400 hover:underline">
+                      Cancelar
+                    </button>
+                  }
+                </div>
+              } @else {
+                <span class="text-stone-400 dark:text-stone-500 text-sm">Sin asignar</span>
+              }
+            }
+          </div>
+          @if (slot.asignacion) {
+            <button type="button"
+                    (click)="remove($index)"
+                    [disabled]="updating() !== null"
+                    class="text-sm text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50 justify-self-end">
+              Quitar
+            </button>
+          } @else if (!isSelecting($index)) {
+            <button type="button"
+                    (click)="openSelector($index)"
+                    class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors justify-self-end">
+              Asignar
+            </button>
+          } @else {
+            <span class="w-12"></span>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

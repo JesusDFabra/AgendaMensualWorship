@@ -1,13 +1,14 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
+import { ServiceAssignmentFormComponent } from '../service-assignment-form/service-assignment-form.component';
 
 type DayCell = { day: number | null; dateStr: string | null; servicio: Servicio | null };
 
 @Component({
   selector: 'app-agenda-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ServiceAssignmentFormComponent],
   templateUrl: './agenda-list.component.html',
   styleUrl: './agenda-list.component.scss',
 })
@@ -16,6 +17,8 @@ export class AgendaListComponent implements OnInit {
   currentMonth = signal(new Date().getMonth() + 1); // 1-12
   services = signal<Servicio[]>([]);
   loading = signal(true);
+  /** Modal de asignación: al elegir un día con servicio */
+  selectedServicio = signal<Servicio | null>(null);
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -105,5 +108,23 @@ export class AgendaListComponent implements OnInit {
     }
     this.currentMonth.set(m);
     this.currentYear.set(y);
+  }
+
+  openAssignmentModal(servicio: Servicio): void {
+    this.selectedServicio.set(servicio);
+  }
+
+  closeAssignmentModal(): void {
+    this.selectedServicio.set(null);
+  }
+
+  formatDate(fecha: string): string {
+    const d = new Date(fecha + 'T12:00:00');
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const day = d.getDate();
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const weekday = weekdays[d.getDay()];
+    return `${weekday} ${day}/${month}/${year}`;
   }
 }

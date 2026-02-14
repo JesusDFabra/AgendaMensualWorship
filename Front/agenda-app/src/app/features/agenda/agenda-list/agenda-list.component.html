@@ -9,7 +9,7 @@
   <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
     <h1 class="text-xl font-bold text-stone-800 dark:text-stone-100">Agenda de servicios</h1>
     <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
-      Elige un día del calendario que tenga servicio para asignar batería, guitarra, bajo, piano y voces.
+      Elige un día del calendario que tenga servicio para asignar al equipo de alabanza.
     </p>
   </header>
 
@@ -27,7 +27,10 @@
             ← Anterior
           </button>
         </div>
-        <h2 class="text-lg font-semibold text-stone-800 dark:text-stone-100 text-center">{{ monthLabel() }}</h2>
+        <a [routerLink]="['/agenda', 'mes', currentYear(), currentMonth()]"
+             class="text-lg font-semibold text-stone-800 dark:text-stone-100 text-center hover:text-amber-600 dark:hover:text-amber-400 transition-colors underline-offset-2 hover:underline">
+          {{ monthLabel() }}
+        </a>
         <div class="flex justify-end">
           <button type="button"
                   (click)="nextMonth()"
@@ -48,13 +51,14 @@
             <div class="aspect-[2/1] rounded-lg bg-stone-50/50 dark:bg-stone-800/30"
                  aria-hidden="true"></div>
           } @else if (cell.servicio) {
-            <a [routerLink]="['/agenda', cell.servicio.id]"
-               [attr.aria-label]="'Asignar servicio del día ' + cell.day"
-               class="aspect-[2/1] rounded-lg text-sm font-medium min-w-0 flex items-center justify-center
-                      bg-amber-500 dark:bg-amber-500 text-white hover:bg-amber-600 dark:hover:bg-amber-600
-                      shadow-sm transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900">
+            <button type="button"
+                    (click)="openAssignmentModal(cell.servicio!)"
+                    [attr.aria-label]="'Asignar servicio del día ' + cell.day"
+                    class="aspect-[2/1] rounded-lg text-sm font-medium min-w-0 flex items-center justify-center
+                           bg-amber-500 dark:bg-amber-500 text-white hover:bg-amber-600 dark:hover:bg-amber-600
+                           shadow-sm transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900">
               {{ cell.day }}
-            </a>
+            </button>
           } @else {
             <div class="aspect-[2/1] rounded-lg bg-stone-100 dark:bg-stone-700/50 text-stone-400 dark:text-stone-500 text-sm flex items-center justify-center border border-stone-200 dark:border-stone-600"
                  aria-hidden="true">
@@ -65,8 +69,39 @@
       </div>
 
       <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
-        Días en amarillo = hay servicio. Clic para abrir la asignación de ese día.
+        Días en naranja = hay servicio (clic para asignar ese día). Clic en el <strong>mes</strong> para ver y programar todo el mes.
       </p>
     </section>
+  }
+
+  <!-- Modal de asignación -->
+  @if (selectedServicio()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-asignacion-title">
+      <div class="fixed inset-0 bg-black/50"
+           (click)="closeAssignmentModal()"></div>
+      <div class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 shadow-xl">
+        <div class="sticky top-0 flex items-center justify-between gap-4 p-4 border-b border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 rounded-t-2xl">
+          <h2 id="modal-asignacion-title" class="text-lg text-stone-800 dark:text-stone-100">
+            <span class="font-medium text-stone-500 dark:text-stone-400">Asignar miembros al servicio — </span>
+            <span class="font-bold text-stone-900 dark:text-stone-50">{{ formatDate(selectedServicio()!.fecha) }}</span>
+          </h2>
+          <button type="button"
+                  (click)="closeAssignmentModal()"
+                  class="rounded-lg p-2 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                  aria-label="Cerrar">
+            <span class="text-xl leading-none" aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="p-4">
+          <app-service-assignment-form
+            [servicioId]="selectedServicio()!.id"
+            [servicio]="selectedServicio()!"
+            [showHeader]="false" />
+        </div>
+      </div>
+    </div>
   }
 </div>

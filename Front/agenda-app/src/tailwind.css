@@ -2,3 +2,10 @@
 
 /* Modo oscuro por clase (toggle manual): aplicar cuando el elemento está dentro de .dark */
 @custom-variant dark (.dark &);
+
+/* Cursor tipo mano en botones y enlaces */
+button,
+a[routerLink],
+a[href] {
+  cursor: pointer;
+}
