@@ -18,6 +18,41 @@
     </header>
   }
 
+  @if (activeTabInput() == null) {
+  <nav class="flex flex-shrink-0 gap-1 mb-4 p-1 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-100 dark:bg-stone-800/80"
+       aria-label="Secciones del servicio">
+    <button type="button"
+            (click)="setTab('miembros')"
+            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            [class.bg-white]="effectiveTab() === 'miembros'"
+            [class.dark:bg-stone-700]="effectiveTab() === 'miembros'"
+            [class.text-amber-700]="effectiveTab() === 'miembros'"
+            [class.dark:text-amber-300]="effectiveTab() === 'miembros'"
+            [class.shadow-sm]="effectiveTab() === 'miembros'"
+            [class.text-stone-600]="effectiveTab() !== 'miembros'"
+            [class.dark:text-stone-400]="effectiveTab() !== 'miembros'"
+            [class.hover:bg-stone-200]="effectiveTab() !== 'miembros'"
+            [class.dark:hover:bg-stone-700]="effectiveTab() !== 'miembros'">
+      Miembros
+    </button>
+    <button type="button"
+            (click)="setTab('canciones')"
+            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            [class.bg-white]="effectiveTab() === 'canciones'"
+            [class.dark:bg-stone-700]="effectiveTab() === 'canciones'"
+            [class.text-amber-700]="effectiveTab() === 'canciones'"
+            [class.dark:text-amber-300]="effectiveTab() === 'canciones'"
+            [class.shadow-sm]="effectiveTab() === 'canciones'"
+            [class.text-stone-600]="effectiveTab() !== 'canciones'"
+            [class.dark:text-stone-400]="effectiveTab() !== 'canciones'"
+            [class.hover:bg-stone-200]="effectiveTab() !== 'canciones'"
+            [class.dark:hover:bg-stone-700]="effectiveTab() !== 'canciones'">
+      Canciones
+    </button>
+  </nav>
+  }
+
+  @if (effectiveTab() === 'miembros') {
   <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden">
     <ul class="divide-y divide-stone-200 dark:divide-stone-600">
       @for (slot of slots(); track slot.label + $index) {
@@ -79,5 +114,193 @@
         </li>
       }
     </ul>
+  </section>
+  } @else if (effectiveTab() === 'canciones') {
+  <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden p-4">
+    <div class="mb-4 p-4 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50">
+      <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
+        {{ editingCancionId() ? 'Editar directores' : 'Agregar canción al servicio' }}
+      </h3>
+
+      @if (editingCancionId()) {
+        <p class="text-sm text-stone-600 dark:text-stone-300 mb-3">Canción fija; solo puedes cambiar quién dirige.</p>
+      } @else {
+        <div class="mb-3">
+          <label for="cancion-search" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Buscar canción por nombre</label>
+          <input id="cancion-search"
+                 type="text"
+                 [ngModel]="formCancion().searchQuery"
+                 (ngModelChange)="onSearchInput($event)"
+                 placeholder="Escribe para buscar en el catálogo..."
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500" />
+          @if (loadingSearch()) {
+            <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Buscando…</p>
+          }
+          @if (formCancion().searchQuery && catalogResults().length > 0 && !selectedCancion()) {
+            <ul class="mt-2 max-h-40 overflow-y-auto rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 divide-y divide-stone-200 dark:divide-stone-600">
+              @for (can of catalogResults(); track can.id) {
+                <li>
+                  <button type="button"
+                          (click)="selectCancion(can)"
+                          class="w-full text-left px-3 py-2 text-sm text-stone-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                    {{ can.nombre }}
+                    @if (can.autor) {
+                      <span class="text-stone-500 dark:text-stone-400">— {{ can.autor }}</span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+          @if (formCancion().searchQuery.trim() && !selectedCancion() && !loadingSearch() && catalogResults().length === 0) {
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span class="text-sm text-stone-500 dark:text-stone-400">No está en la lista.</span>
+              <button type="button"
+                      (click)="startAddingNewSong()"
+                      class="text-sm font-medium text-amber-600 dark:text-amber-400 hover:underline">
+                Agregar «{{ formCancion().searchQuery }}» como nueva canción
+              </button>
+            </div>
+          }
+          @if (selectedCancion()) {
+            <div class="mt-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-500">
+              <p class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">Canción elegida</p>
+              <p class="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 leading-tight">
+                {{ selectedCancion()!.nombre }}@if (selectedCancion()!.autor) { <span class="font-semibold text-stone-600 dark:text-stone-300">— {{ selectedCancion()!.autor }}</span> }
+              </p>
+            </div>
+          }
+          @if (addingNewSong()) {
+            <div class="mt-3 grid gap-2 sm:grid-cols-2">
+              <div>
+                <label for="cancion-new-autor" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Autor (opcional)</label>
+                <input id="cancion-new-autor"
+                       type="text"
+                       [ngModel]="formCancion().newAutor"
+                       (ngModelChange)="patchFormCancion({ newAutor: $event })"
+                       placeholder="Autor o quien la canta"
+                       class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 text-sm" />
+              </div>
+              <div>
+                <label for="cancion-new-enlace" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Enlace / YouTube (opcional)</label>
+                <input id="cancion-new-enlace"
+                       type="url"
+                       [ngModel]="formCancion().newEnlace"
+                       (ngModelChange)="patchFormCancion({ newEnlace: $event })"
+                       placeholder="https://..."
+                       class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 text-sm" />
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label for="cancion-director1" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Quien dirige (1)</label>
+          <select id="cancion-director1"
+                  [ngModel]="formCancion().director1Id"
+                  (ngModelChange)="patchFormCancion({ director1Id: $event })"
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            <option [ngValue]="null">— Sin asignar —</option>
+            @for (v of vocesAsignadas(); track v.id) {
+              <option [ngValue]="v.id">{{ v.displayName }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="cancion-director2" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Quien dirige (2)</label>
+          <select id="cancion-director2"
+                  [ngModel]="formCancion().director2Id"
+                  (ngModelChange)="patchFormCancion({ director2Id: $event })"
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            <option [ngValue]="null">— Sin asignar —</option>
+            @for (v of vocesAsignadas(); track v.id) {
+              <option [ngValue]="v.id">{{ v.displayName }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      @if (vocesAsignadas().length === 0) {
+        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Asigna voces en la pestaña Miembros para elegir quien dirige.</p>
+      }
+      @if (cancionError()) {
+        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ cancionError() }}</p>
+      }
+
+      <div class="mt-3 flex gap-2">
+        <button type="button"
+                (click)="saveCancion()"
+                [disabled]="savingCancion() || !canSaveCancion()"
+                class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
+          {{ editingCancionId() ? 'Guardar' : 'Agregar canción' }}
+        </button>
+        @if (editingCancionId() || selectedCancion() || addingNewSong()) {
+          <button type="button"
+                  (click)="resetFormCancion()"
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+            Cancelar
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (loadingCanciones()) {
+      <p class="text-sm text-stone-500 dark:text-stone-400 py-4">Cargando canciones…</p>
+    } @else if (canciones().length === 0) {
+      <p class="text-sm text-stone-500 dark:text-stone-400 py-4">Aún no hay canciones. Busca o agrega una arriba.</p>
+    } @else {
+      <ul class="divide-y divide-stone-200 dark:divide-stone-600">
+        @for (c of canciones(); track c.id) {
+          <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0">
+              <span class="font-medium text-stone-800 dark:text-stone-100">{{ c.cancionNombre ?? '—' }}</span>
+              @if (c.cancionAutor) {
+                <span class="text-stone-500 dark:text-stone-400 text-sm ml-2">— {{ c.cancionAutor }}</span>
+              }
+              <div class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+                Dirige: {{ directoresDisplay(c) }}
+                @if (c.cancionEnlace) {
+                  <a [href]="c.cancionEnlace" target="_blank" rel="noopener noreferrer" class="ml-2 text-amber-600 dark:text-amber-400 hover:underline">Enlace</a>
+                }
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button type="button"
+                      (click)="editCancion(c)"
+                      class="text-sm text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400">
+                Editar
+              </button>
+              <button type="button"
+                      (click)="deleteCancion(c)"
+                      [disabled]="savingCancion()"
+                      class="text-sm text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50">
+                Eliminar
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+  }
+
+  <!-- Sección Canciones en la parte inferior (siempre visible) -->
+  <section class="mt-6 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden p-4">
+    <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">Canciones</h3>
+    @if (loadingCanciones()) {
+      <p class="text-sm text-stone-500 dark:text-stone-400 py-2">Cargando…</p>
+    } @else if (canciones().length === 0) {
+      <p class="text-sm text-stone-500 dark:text-stone-400 py-2">Sin canciones asignadas.</p>
+    } @else {
+      <ul class="divide-y divide-stone-200 dark:divide-stone-600 space-y-2">
+        @for (c of canciones(); track c.id) {
+          <li class="py-2">
+            <div class="text-xs font-medium text-stone-500 dark:text-stone-400">Dirige: {{ directoresDisplay(c) }}</div>
+            <div class="text-stone-800 dark:text-stone-100">{{ c.cancionNombre ?? '—' }}@if (c.cancionAutor) { — {{ c.cancionAutor }} }</div>
+          </li>
+        }
+      </ul>
+    }
   </section>
 }

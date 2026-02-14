@@ -4,6 +4,13 @@
        class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
       ← Volver al listado
     </a>
+    @if (member && !editUnlocked) {
+      <button type="button"
+              (click)="openEditModal()"
+              class="rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
+        Editar
+      </button>
+    }
   </div>
 
   @if (loading) {
@@ -17,6 +24,10 @@
         Volver al listado
       </a>
     </div>
+  } @else if (editUnlocked) {
+    <app-member-form [memberId]="member.id"
+                     (saved)="onMemberSaved()"
+                     (cancelled)="editUnlocked = false"></app-member-form>
   } @else {
     <!-- Cabecera: nombre de la persona -->
     <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400">
@@ -145,6 +156,45 @@
                     [disabled]="updatingActivo"
                     class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
               {{ updatingActivo ? 'Guardando…' : 'Confirmar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Modal verificar documento para editar -->
+    @if (showEditModal) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="edit-modal-title">
+        <div class="fixed inset-0 bg-black/50" (click)="closeEditModal()"></div>
+        <div class="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
+          <h3 id="edit-modal-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">Editar datos de «{{ member.nombre }} {{ member.apellido }}»</h3>
+          <p class="text-sm text-stone-600 dark:text-stone-400 mb-4">
+            Ingresa el número de documento para poder editar cualquier campo.
+          </p>
+          <label for="edit-doc" class="sr-only">Numero de documento</label>
+          <input id="edit-doc"
+                 type="text"
+                 [(ngModel)]="editDocumento"
+                 name="editDocumento"
+                 placeholder="Número de documento"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-3"
+                 (keydown.enter)="confirmEditDocumento()">
+          @if (editDocError) {
+            <p class="text-sm text-red-600 dark:text-red-400 mb-3">{{ editDocError }}</p>
+          }
+          <div class="flex gap-3 justify-end">
+            <button type="button"
+                    (click)="closeEditModal()"
+                    class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+              Cancelar
+            </button>
+            <button type="button"
+                    (click)="confirmEditDocumento()"
+                    class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
+              Continuar
             </button>
           </div>
         </div>

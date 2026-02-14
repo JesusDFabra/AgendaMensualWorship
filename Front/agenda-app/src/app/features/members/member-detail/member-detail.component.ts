@@ -7,13 +7,14 @@ import { forkJoin } from 'rxjs';
 import { MemberService, Member } from '../../../core/services/member.service';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
 import { NovedadService, Novedad } from '../../../core/services/novedad.service';
+import { MemberFormComponent } from '../member-form/member-form.component';
 
 type NovedadDayCell = { day: number | null; dateStr: string | null; servicio: Servicio | null };
 
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, MemberFormComponent],
   templateUrl: './member-detail.component.html',
   styleUrl: './member-detail.component.scss',
 })
@@ -40,6 +41,11 @@ export class MemberDetailComponent implements OnInit {
   showMotivoForNovedad: Novedad | null = null;
   motivoTexto = '';
   savingMotivo = false;
+
+  showEditModal = false;
+  editDocumento = '';
+  editDocError: string | null = null;
+  editUnlocked = false;
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -303,5 +309,41 @@ export class MemberDetailComponent implements OnInit {
           this.savingMotivo = false;
         },
       });
+  }
+
+  openEditModal(): void {
+    this.showEditModal = true;
+    this.editDocumento = '';
+    this.editDocError = null;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editDocumento = '';
+    this.editDocError = null;
+  }
+
+  confirmEditDocumento(): void {
+    if (!this.member) return;
+    const doc = this.editDocumento.trim();
+    const correcto = String(this.member.identificacion ?? '').trim();
+    const esAdmin = doc.toLowerCase() === 'admin';
+    if (!esAdmin && doc !== correcto) {
+      this.editDocError = 'El número de documento no coincide.';
+      return;
+    }
+    this.editDocError = null;
+    this.showEditModal = false;
+    this.editUnlocked = true;
+  }
+
+  onMemberSaved(): void {
+    if (!this.member) return;
+    this.memberService.getById(this.member.id).subscribe({
+      next: (data) => {
+        this.member = data;
+        this.editUnlocked = false;
+      },
+    });
   }
 }

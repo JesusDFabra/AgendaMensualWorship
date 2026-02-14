@@ -1,9 +1,11 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
 import { AsignacionService, Asignacion } from '../../../core/services/asignacion.service';
+import { ServicioCancionService, ServicioCancion } from '../../../core/services/servicio-cancion.service';
 import { ServiceAssignmentFormComponent } from '../service-assignment-form/service-assignment-form.component';
 import { AGENDA_SLOTS } from '../agenda-slots';
 
@@ -11,6 +13,7 @@ type DayWithAsignaciones = {
   servicio: Servicio;
   asignaciones: Asignacion[];
   slots: { label: string; nombre: string | null; nombreCompleto: string | null }[];
+  canciones: ServicioCancion[];
 };
 
 @Component({
@@ -26,6 +29,7 @@ export class AgendaMonthComponent implements OnInit {
   servicesInMonth = signal<DayWithAsignaciones[]>([]);
   loading = signal(true);
   selectedServicio = signal<Servicio | null>(null);
+  modalTab = signal<'miembros' | 'canciones'>('miembros');
   /** Asignaciones ya cargadas del mes; se pasan al modal para no volver a pedirlas. */
   selectedInitialAsignaciones = signal<Asignacion[] | null>(null);
   /** True si en el modal se asignó o quitó a alguien; solo entonces recargamos el mes al cerrar. */
@@ -48,6 +52,7 @@ export class AgendaMonthComponent implements OnInit {
     private router: Router,
     private servicioService: ServicioService,
     private asignacionService: AsignacionService,
+    private servicioCancionService: ServicioCancionService,
   ) {}
 
   ngOnInit(): void {
@@ -86,14 +91,36 @@ export class AgendaMonthComponent implements OnInit {
               servicio,
               asignaciones: asignacionesArrays[i] ?? [],
               slots: this.asignacionesToSlots(asignacionesArrays[i] ?? []),
+              canciones: [],
             }));
             this.servicesInMonth.set(result);
             this.loading.set(false);
+            this.loadCancionesForMonth(inMonth);
           },
           error: () => this.loading.set(false),
         });
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  /** Carga canciones de cada servicio del mes y actualiza la lista (no bloquea si falla). */
+  private loadCancionesForMonth(inMonth: Servicio[]): void {
+    if (inMonth.length === 0) return;
+    forkJoin(inMonth.map(s =>
+      this.servicioCancionService.getByServicio(s.id).pipe(
+        catchError(() => of<ServicioCancion[]>([]))
+      )
+    )).subscribe({
+      next: (cancionesArrays) => {
+        const current = this.servicesInMonth();
+        if (current.length !== cancionesArrays.length) return;
+        const updated = current.map((day, i) => ({
+          ...day,
+          canciones: cancionesArrays[i] ?? [],
+        }));
+        this.servicesInMonth.set(updated);
+      },
     });
   }
 
@@ -144,6 +171,10 @@ export class AgendaMonthComponent implements OnInit {
     this.selectedInitialAsignaciones.set(day.asignaciones);
   }
 
+  setModalTab(tab: 'miembros' | 'canciones'): void {
+    this.modalTab.set(tab);
+  }
+
   closeModal(): void {
     if (this.hasChangesInModal) {
       this.loadMonth();
@@ -151,10 +182,21 @@ export class AgendaMonthComponent implements OnInit {
     }
     this.selectedServicio.set(null);
     this.selectedInitialAsignaciones.set(null);
+    this.modalTab.set('miembros');
   }
 
   onAsignacionesChanged(): void {
     this.hasChangesInModal = true;
+  }
+
+  /** Texto directores para una canción del servicio. */
+  directoresDisplay(c: ServicioCancion): string {
+    const a = c.director1Nombre?.trim();
+    const b = c.director2Nombre?.trim();
+    if (a && b) return `${a} y ${b}`;
+    if (a) return a;
+    if (b) return b;
+    return '—';
   }
 
   prevMonth(): void {

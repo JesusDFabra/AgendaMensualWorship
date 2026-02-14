@@ -1,0 +1,172 @@
+<div class="flex flex-col gap-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">Catálogo de canciones</h1>
+    <div class="flex items-center gap-3">
+      <button type="button"
+              (click)="openAdd()"
+              class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-800 transition-colors">
+        <span aria-hidden="true">+</span> Agregar canción
+      </button>
+      <a routerLink="/"
+         class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+        ← Volver al inicio
+      </a>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-red-800 dark:text-red-300 text-sm">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Buscador -->
+  @if (!loading()) {
+    <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 px-4 py-3 shadow-sm">
+      <label for="cancion-search" class="sr-only">Buscar por nombre o autor</label>
+      <input id="cancion-search"
+             type="search"
+             placeholder="Buscar por nombre o autor…"
+             [ngModel]="searchQuery()"
+             (ngModelChange)="searchQuery.set($event)"
+             class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+    </div>
+  }
+
+  <!-- Formulario agregar / editar -->
+  @if (showForm()) {
+    <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-amber-50/50 dark:bg-amber-900/10 p-4 shadow-sm">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
+        {{ isAdding() ? 'Nueva canción' : 'Editar canción' }}
+      </h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label for="form-nombre" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Nombre *</label>
+          <input id="form-nombre"
+                 type="text"
+                 [ngModel]="formNombre()"
+                 (ngModelChange)="formNombre.set($event)"
+                 placeholder="Ej. Grande es el Señor"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+        <div>
+          <label for="form-autor" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Autor</label>
+          <input id="form-autor"
+                 type="text"
+                 [ngModel]="formAutor()"
+                 (ngModelChange)="formAutor.set($event)"
+                 placeholder="Opcional"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+        <div>
+          <label for="form-enlace" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Enlace / YouTube</label>
+          <input id="form-enlace"
+                 type="url"
+                 [ngModel]="formEnlace()"
+                 (ngModelChange)="formEnlace.set($event)"
+                 placeholder="https://..."
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button type="button"
+                (click)="save()"
+                [disabled]="saving() || !formNombre().trim()"
+                class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
+          {{ isAdding() ? 'Agregar' : 'Guardar' }}
+        </button>
+        <button type="button"
+                (click)="closeForm()"
+                class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Cargando -->
+  @if (loading()) {
+    <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
+      <p>Cargando canciones…</p>
+    </div>
+  }
+
+  <!-- Listado -->
+  @if (!loading()) {
+    @if (filteredCanciones().length === 0) {
+      <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
+        @if (searchQuery().trim()) {
+          <p>Ninguna canción coincide con «{{ searchQuery() }}».</p>
+        } @else {
+          <p>No hay canciones en el catálogo. Agrega una arriba.</p>
+        }
+      </div>
+    } @else {
+      <div class="overflow-hidden rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm">
+        <ul class="divide-y divide-stone-200 dark:divide-stone-600">
+          @for (c of filteredCanciones(); track c.id) {
+            <li class="flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-stone-50 dark:hover:bg-stone-700/30 transition-colors"
+                [ngClass]="isEditing(c.id) ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''">
+              <div class="min-w-0 flex-1">
+                <span class="font-medium text-stone-800 dark:text-stone-100">{{ c.nombre }}</span>
+                @if (c.autor) {
+                  <span class="text-stone-500 dark:text-stone-400 text-sm ml-2">— {{ c.autor }}</span>
+                }
+                @if (c.enlace) {
+                  <a [href]="c.enlace"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     class="block text-sm text-amber-600 dark:text-amber-400 hover:underline mt-0.5">
+                    Ver enlace
+                  </a>
+                }
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button type="button"
+                        (click)="openEdit(c)"
+                        [disabled]="showForm() && !isEditing(c.id)"
+                        class="text-sm font-medium text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 disabled:opacity-50">
+                  Editar
+                </button>
+                <button type="button"
+                        (click)="confirmDelete(c)"
+                        [disabled]="saving()"
+                        class="text-sm font-medium text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50">
+                  Eliminar
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  }
+
+  <!-- Modal confirmar eliminar -->
+  @if (deletingId() !== null) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="confirm-delete-title">
+      <div class="fixed inset-0 bg-black/50"
+           (click)="cancelDelete()"></div>
+      <div class="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
+        <h2 id="confirm-delete-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100">¿Eliminar canción?</h2>
+        <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">Esta acción no se puede deshacer.</p>
+        <div class="mt-4 flex justify-end gap-2">
+          <button type="button"
+                  (click)="cancelDelete()"
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+            Cancelar
+          </button>
+          <button type="button"
+                  (click)="doDelete()"
+                  [disabled]="saving()"
+                  class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

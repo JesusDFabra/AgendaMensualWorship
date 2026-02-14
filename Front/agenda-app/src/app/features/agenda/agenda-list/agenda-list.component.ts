@@ -19,6 +19,8 @@ export class AgendaListComponent implements OnInit {
   loading = signal(true);
   /** Modal de asignación: al elegir un día con servicio */
   selectedServicio = signal<Servicio | null>(null);
+  /** Pestaña activa en el modal (siempre visible en la cabecera) */
+  modalTab = signal<'miembros' | 'canciones'>('miembros');
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -116,6 +118,11 @@ export class AgendaListComponent implements OnInit {
 
   closeAssignmentModal(): void {
     this.selectedServicio.set(null);
+    this.modalTab.set('miembros');
+  }
+
+  setModalTab(tab: 'miembros' | 'canciones'): void {
+    this.modalTab.set(tab);
   }
 
   formatDate(fecha: string): string {

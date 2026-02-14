@@ -36,5 +36,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/agenda/service-detail/service-detail.component').then((m) => m.ServiceDetailComponent),
   },
+  {
+    path: 'canciones',
+    loadComponent: () =>
+      import('./features/canciones/cancion-list.component').then((m) => m.CancionListComponent),
+  },
   { path: '**', redirectTo: '' },
 ];
