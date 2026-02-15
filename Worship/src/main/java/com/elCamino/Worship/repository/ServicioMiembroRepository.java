@@ -10,5 +10,7 @@ public interface ServicioMiembroRepository extends JpaRepository<ServicioMiembro
 
     List<ServicioMiembro> findByServicio_Id(Long servicioId);
 
+    List<ServicioMiembro> findByMiembro_IdOrderByServicio_FechaAsc(Long miembroId);
+
     boolean existsByServicio_IdAndMiembro_Id(Long servicioId, Long miembroId);
 }

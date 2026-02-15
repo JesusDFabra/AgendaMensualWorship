@@ -66,6 +66,31 @@ public class ServicioMiembroController {
     }
 
     /**
+     * Servicios en los que está asignado un miembro (para mostrar "próximos servicios" en su perfil).
+     * Ordenado por fecha ascendente.
+     */
+    @GetMapping("/miembro/{miembroId}/servicios")
+    public ResponseEntity<List<ServicioAsignadoDto>> getServiciosByMiembro(@PathVariable Long miembroId) {
+        if (!memberRepository.existsById(miembroId)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<ServicioMiembro> list = asignacionRepository.findByMiembro_IdOrderByServicio_FechaAsc(miembroId);
+        List<ServicioAsignadoDto> dtos = list.stream()
+                .map(sm -> {
+                    Service s = sm.getServicio();
+                    Member m = sm.getMiembro();
+                    String rolNombre = m.getRol() != null ? m.getRol().getNombre() : null;
+                    return new ServicioAsignadoDto(
+                            s.getId(),
+                            s.getFecha() != null ? s.getFecha().toString() : null,
+                            s.getNombre(),
+                            rolNombre);
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
      * Miembros disponibles para un rol en este servicio: tienen ese rol, están activos,
      * no tienen novedad ese día y no están ya asignados a este servicio.
      */
@@ -199,5 +224,29 @@ public class ServicioMiembroController {
 
         public Long getMiembroId() { return miembroId; }
         public void setMiembroId(Long miembroId) { this.miembroId = miembroId; }
+    }
+
+    /** DTO para listar servicios en los que está asignado un miembro (perfil). */
+    public static final class ServicioAsignadoDto {
+        private Long servicioId;
+        private String fecha;
+        private String nombreServicio;
+        private String rolNombre;
+
+        public ServicioAsignadoDto(Long servicioId, String fecha, String nombreServicio, String rolNombre) {
+            this.servicioId = servicioId;
+            this.fecha = fecha;
+            this.nombreServicio = nombreServicio;
+            this.rolNombre = rolNombre;
+        }
+
+        public Long getServicioId() { return servicioId; }
+        public void setServicioId(Long servicioId) { this.servicioId = servicioId; }
+        public String getFecha() { return fecha; }
+        public void setFecha(String fecha) { this.fecha = fecha; }
+        public String getNombreServicio() { return nombreServicio; }
+        public void setNombreServicio(String nombreServicio) { this.nombreServicio = nombreServicio; }
+        public String getRolNombre() { return rolNombre; }
+        public void setRolNombre(String rolNombre) { this.rolNombre = rolNombre; }
     }
 }

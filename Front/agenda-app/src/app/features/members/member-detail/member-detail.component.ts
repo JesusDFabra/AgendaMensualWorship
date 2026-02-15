@@ -6,15 +6,17 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MemberService, Member } from '../../../core/services/member.service';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
+import { AsignacionService, ServicioAsignado } from '../../../core/services/asignacion.service';
 import { NovedadService, Novedad } from '../../../core/services/novedad.service';
 import { MemberFormComponent } from '../member-form/member-form.component';
+import { ServiceViewModalComponent } from '../../agenda/service-view-modal/service-view-modal.component';
 
 type NovedadDayCell = { day: number | null; dateStr: string | null; servicio: Servicio | null };
 
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, MemberFormComponent],
+  imports: [CommonModule, FormsModule, RouterLink, MemberFormComponent, ServiceViewModalComponent],
   templateUrl: './member-detail.component.html',
   styleUrl: './member-detail.component.scss',
 })
@@ -46,6 +48,11 @@ export class MemberDetailComponent implements OnInit {
   editDocumento = '';
   editDocError: string | null = null;
   editUnlocked = false;
+
+  proximosServicios: ServicioAsignado[] = [];
+  loadingProximosServicios = false;
+  /** ID del servicio para abrir en modal de solo lectura (null = cerrado). */
+  selectedServicioIdForView: number | null = null;
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -82,6 +89,7 @@ export class MemberDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private memberService: MemberService,
     private servicioService: ServicioService,
+    private asignacionService: AsignacionService,
     private novedadService: NovedadService
   ) {}
 
@@ -102,12 +110,40 @@ export class MemberDetailComponent implements OnInit {
       next: (data) => {
         this.member = data;
         this.loading = false;
+        this.loadProximosServicios(numId);
       },
       error: () => {
         this.notFound = true;
         this.loading = false;
       },
     });
+  }
+
+  private loadProximosServicios(miembroId: number): void {
+    this.loadingProximosServicios = true;
+    const today = new Date().toISOString().slice(0, 10);
+    this.asignacionService.getServiciosByMiembro(miembroId).subscribe({
+      next: (list) => {
+        this.proximosServicios = list.filter((s) => s.fecha >= today);
+        this.loadingProximosServicios = false;
+      },
+      error: () => this.loadingProximosServicios = false,
+    });
+  }
+
+  openServiceView(servicioId: number): void {
+    this.selectedServicioIdForView = servicioId;
+  }
+
+  formatDateLong(fecha: string): string {
+    if (!fecha) return '—';
+    const d = new Date(fecha + 'T12:00:00');
+    if (isNaN(d.getTime())) return fecha;
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const day = d.getDate();
+    const month = this.monthNames[d.getMonth()];
+    const year = d.getFullYear();
+    return `${weekdays[d.getDay()]} ${day} ${month} ${year}`;
   }
 
   formatDate(value: string | null): string {

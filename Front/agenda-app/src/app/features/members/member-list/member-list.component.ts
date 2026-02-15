@@ -17,10 +17,13 @@ export class MemberListComponent implements OnInit {
   currentPage = 1;
   members: Member[] = [];
   searchTerm = '';
-  showOnlyActive = false;
+  /** true = mostrar todos; false = solo activos (toggle OFF = solo activos, ON = todos). */
+  showAll = false;
   showAddModal = false;
   loading = true;
   error: string | null = null;
+  /** Criterio de ordenación (por defecto apellidos). */
+  sortBy: 'apellido' | 'nombreCompleto' | 'alias' | 'rol' = 'apellido';
 
   get filteredMembers(): Member[] {
     let list = this.members;
@@ -34,10 +37,34 @@ export class MemberListComponent implements OnInit {
         return nombre.includes(term) || apellido.includes(term) || alias.includes(term) || rol.includes(term);
       });
     }
-    if (this.showOnlyActive) {
+    if (!this.showAll) {
       list = list.filter((m) => m.activo === true);
     }
+    list = [...list].sort((a, b) => this.compareMembers(a, b));
     return list;
+  }
+
+  private compareMembers(a: Member, b: Member): number {
+    const empty = '\uFFFF'; // para que null/undefined queden al final
+    switch (this.sortBy) {
+      case 'apellido': {
+        const apA = (a.apellido ?? '').trim().toLowerCase();
+        const apB = (b.apellido ?? '').trim().toLowerCase();
+        if (apA !== apB) return apA.localeCompare(apB);
+        return (a.nombre ?? '').trim().toLowerCase().localeCompare((b.nombre ?? '').trim().toLowerCase());
+      }
+      case 'nombreCompleto': {
+        const fullA = `${(a.nombre ?? '').trim()} ${(a.apellido ?? '').trim()}`.trim().toLowerCase();
+        const fullB = `${(b.nombre ?? '').trim()} ${(b.apellido ?? '').trim()}`.trim().toLowerCase();
+        return fullA.localeCompare(fullB);
+      }
+      case 'alias':
+        return (a.alias ?? empty).trim().toLowerCase().localeCompare((b.alias ?? empty).trim().toLowerCase());
+      case 'rol':
+        return (a.rol?.nombre ?? empty).trim().toLowerCase().localeCompare((b.rol?.nombre ?? empty).trim().toLowerCase());
+      default:
+        return 0;
+    }
   }
 
   get totalPages(): number {
@@ -60,7 +87,11 @@ onSearchInput(): void {
 }
 
 toggleActiveFilter(): void {
-  this.showOnlyActive = !this.showOnlyActive;
+  this.showAll = !this.showAll;
+  this.currentPage = 1;
+}
+
+onSortChange(): void {
   this.currentPage = 1;
 }
 

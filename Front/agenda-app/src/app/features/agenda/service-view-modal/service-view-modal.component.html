@@ -1,0 +1,94 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="service-view-title">
+  <div class="fixed inset-0 bg-black/50" (click)="close()"></div>
+  <div class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 shadow-xl">
+    @if (loading()) {
+      <div class="p-8 text-center text-stone-500 dark:text-stone-400">
+        <p>Cargando servicio…</p>
+      </div>
+    } @else if (notFound() || !servicio()) {
+      <div class="p-8 text-center text-stone-500 dark:text-stone-400">
+        <p>No se encontró el servicio.</p>
+        <button type="button"
+                (click)="close()"
+                class="mt-3 rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+          Cerrar
+        </button>
+      </div>
+    } @else {
+      <div class="sticky top-0 z-10 border-b border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 rounded-t-2xl">
+        <div class="flex items-center justify-between gap-4 p-4">
+          <h2 id="service-view-title" class="text-lg font-bold text-stone-800 dark:text-stone-100">
+            {{ formatDate(servicio()!.fecha) }}
+          </h2>
+          <button type="button"
+                  (click)="close()"
+                  class="rounded-lg p-2 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                  aria-label="Cerrar">
+            <span class="text-xl leading-none" aria-hidden="true">×</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <!-- Miembros: 2 columnas (voces / instrumentos) -->
+        <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <dl class="space-y-1.5">
+                @for (slot of slots().slice(0, 5); track slot.label) {
+                  <div class="flex gap-2">
+                    <dt class="font-medium text-stone-500 dark:text-stone-400 min-w-[4.5rem]">{{ slot.label }}:</dt>
+                    <dd class="text-stone-800 dark:text-stone-200">{{ slot.asignacion ? (slot.asignacion.alias || slot.asignacion.nombreCompleto) : '—' }}</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+            <div>
+              <dl class="space-y-1.5">
+                @for (slot of slots().slice(5); track slot.label) {
+                  <div class="flex gap-2">
+                    <dt class="font-medium text-stone-500 dark:text-stone-400 min-w-[4.5rem]">{{ slot.label }}:</dt>
+                    <dd class="text-stone-800 dark:text-stone-200">{{ slot.asignacion ? (slot.asignacion.alias || slot.asignacion.nombreCompleto) : '—' }}</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <!-- Canciones -->
+        <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">Canciones</h3>
+          @if (canciones().length === 0) {
+            <p class="text-sm text-stone-500 dark:text-stone-400">Sin canciones asignadas.</p>
+          } @else {
+            <ul class="divide-y divide-stone-200 dark:divide-stone-600 space-y-2">
+              @for (c of canciones(); track c.id) {
+                <li class="py-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-stone-800 dark:text-stone-100">{{ c.cancionNombre ?? '—' }}@if (c.cancionAutor) { — {{ c.cancionAutor }} }</span>
+                    @if (c.cancionEnlace) {
+                      <a [href]="c.cancionEnlace" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 hover:underline text-sm shrink-0">Enlace</a>
+                    }
+                  </div>
+                  <div class="text-xs font-medium text-stone-500 dark:text-stone-400 mt-0.5">Dirige: {{ directoresDisplay(c) }}</div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <div class="flex justify-end pt-2">
+          <button type="button"
+                  (click)="close()"
+                  class="rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600 transition-colors">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

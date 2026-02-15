@@ -14,6 +14,14 @@ export interface Asignacion {
   rolId: number | null;
 }
 
+/** Servicio en el que está asignado un miembro (para su perfil). */
+export interface ServicioAsignado {
+  servicioId: number;
+  fecha: string;
+  nombreServicio: string | null;
+  rolNombre: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AsignacionService {
   private baseUrl = `${environment.apiUrl}/api/servicio`;
@@ -22,6 +30,11 @@ export class AsignacionService {
 
   getAsignaciones(servicioId: number): Observable<Asignacion[]> {
     return this.http.get<Asignacion[]>(`${this.baseUrl}/${servicioId}/asignaciones`);
+  }
+
+  /** Servicios en los que está asignado un miembro (ordenados por fecha, para el perfil). */
+  getServiciosByMiembro(miembroId: number): Observable<ServicioAsignado[]> {
+    return this.http.get<ServicioAsignado[]>(`${this.baseUrl}/miembro/${miembroId}/servicios`);
   }
 
   getDisponibles(servicioId: number, rolId: number): Observable<Member[]> {

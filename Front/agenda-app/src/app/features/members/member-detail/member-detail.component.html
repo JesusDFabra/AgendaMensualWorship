@@ -1,16 +1,9 @@
 <div class="flex flex-col gap-4">
-  <div class="flex items-center justify-between">
+  <div class="flex justify-start">
     <a routerLink="/miembros"
        class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
       ← Volver al listado
     </a>
-    @if (member && !editUnlocked) {
-      <button type="button"
-              (click)="openEditModal()"
-              class="rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
-        Editar
-      </button>
-    }
   </div>
 
   @if (loading) {
@@ -30,25 +23,34 @@
                      (cancelled)="editUnlocked = false"></app-member-form>
   } @else {
     <!-- Cabecera: nombre de la persona -->
-    <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400">
-      <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
-        {{ member.nombre }} {{ member.apellido }}
-      </h1>
-      @if (member.alias) {
-        <p class="mt-1 text-lg text-stone-600 dark:text-stone-300 font-medium">«{{ member.alias }}»</p>
-      }
-      <div class="mt-3 flex items-center gap-2">
-        <span [ngClass]="{
-          'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium': true,
-          'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': member.activo,
-          'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400': !member.activo
-        }">
-          {{ member.activo ? 'Activo' : 'Inactivo' }}
-        </span>
-        @if (member.rol?.nombre) {
-          <span class="text-sm text-stone-500 dark:text-stone-400">· {{ member.rol?.nombre }}</span>
+    <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400 flex flex-wrap items-start justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
+          {{ member.nombre }} {{ member.apellido }}
+        </h1>
+        @if (member.alias) {
+          <p class="mt-1 text-lg text-stone-600 dark:text-stone-300 font-medium">«{{ member.alias }}»</p>
         }
+        <div class="mt-3 flex items-center gap-2">
+          <span [ngClass]="{
+            'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium': true,
+            'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': member.activo,
+            'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400': !member.activo
+          }">
+            {{ member.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+          @if (member.rol?.nombre) {
+            <span class="text-sm text-stone-500 dark:text-stone-400">· {{ member.rol?.nombre }}</span>
+          }
+        </div>
       </div>
+      @if (!editUnlocked) {
+        <button type="button"
+                (click)="openEditModal()"
+                class="shrink-0 rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
+          Editar
+        </button>
+      }
     </header>
 
     <!-- Datos básicos -->
@@ -117,6 +119,38 @@
         }
       </dl>
     </section>
+
+    <!-- Próximos servicios en los que está asignado -->
+    <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">Próximos servicios</h2>
+      @if (loadingProximosServicios) {
+        <p class="text-sm text-stone-500 dark:text-stone-400">Cargando…</p>
+      } @else if (proximosServicios.length === 0) {
+        <p class="text-sm text-stone-500 dark:text-stone-400">No tiene servicios asignados a partir de hoy.</p>
+      } @else {
+        <ul class="space-y-2">
+          @for (s of proximosServicios; track s.servicioId) {
+            <li>
+              <button type="button"
+                      (click)="openServiceView(s.servicioId)"
+                      class="w-full flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-700/30 px-3 py-2 text-sm font-medium text-stone-800 dark:text-stone-200 hover:bg-amber-50 hover:border-amber-200 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors text-left">
+                <span>{{ formatDateLong(s.fecha) }}</span>
+                @if (s.rolNombre) {
+                  <span class="text-stone-500 dark:text-stone-400">· {{ s.rolNombre }}</span>
+                }
+                <span class="ml-auto text-amber-600 dark:text-amber-400 text-xs">Ver servicio →</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Modal ver detalle del servicio (solo lectura) -->
+    @if (selectedServicioIdForView !== null) {
+      <app-service-view-modal [servicioId]="selectedServicioIdForView"
+                              (closed)="selectedServicioIdForView = null" />
+    }
 
     <!-- Modal confirmar cambio de estado con documento -->
     @if (showConfirmActivo) {

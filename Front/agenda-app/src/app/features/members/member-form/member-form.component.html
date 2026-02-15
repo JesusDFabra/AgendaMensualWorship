@@ -1,13 +1,13 @@
 <div class="flex flex-col gap-6">
   @if (!isModal) {
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">{{ memberId ? 'Editar miembro' : 'Agregar nuevo miembro' }}</h1>
       @if (!memberId) {
         <a routerLink="/miembros"
-           class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+           class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors order-first">
           ← Volver al listado
         </a>
       }
+      <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">{{ memberId ? 'Editar miembro' : 'Agregar nuevo miembro' }}</h1>
     </div>
   }
 

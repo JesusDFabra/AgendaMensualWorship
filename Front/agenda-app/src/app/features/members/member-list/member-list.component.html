@@ -1,17 +1,15 @@
 <div class="flex flex-col gap-4">
   <div class="flex flex-wrap items-center justify-between gap-3">
+    <a routerLink="/"
+       class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors order-first">
+      ← Volver al inicio
+    </a>
     <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">Miembros del equipo</h1>
-    <div class="flex items-center gap-3">
-      <button type="button"
-              (click)="openAddModal()"
-              class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-800 transition-colors">
-        <span aria-hidden="true">+</span> Agregar miembro
-      </button>
-      <a routerLink="/"
-         class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
-        ← Volver al inicio
-      </a>
-    </div>
+    <button type="button"
+            (click)="openAddModal()"
+            class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-800 transition-colors">
+      <span aria-hidden="true">+</span> Agregar miembro
+    </button>
   </div>
 
   <!-- Buscador y filtro activos -->
@@ -26,22 +24,34 @@
                (ngModelChange)="onSearchInput()"
                class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:border-amber-400 dark:focus:ring-amber-400">
       </div>
+      <div class="shrink-0 flex items-center gap-2">
+        <label for="sort-members" class="text-sm text-stone-500 dark:text-stone-400 whitespace-nowrap">Ordenar por:</label>
+        <select id="sort-members"
+                [ngModel]="sortBy"
+                (ngModelChange)="sortBy = $event; onSortChange()"
+                class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2 text-sm text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+          <option value="apellido">Apellidos</option>
+          <option value="nombreCompleto">Nombre completo</option>
+          <option value="alias">Alias</option>
+          <option value="rol">Rol</option>
+        </select>
+      </div>
       <button type="button"
               (click)="toggleActiveFilter()"
-              [class.ring-2]="showOnlyActive"
-              [class.ring-amber-500]="showOnlyActive"
-              [class.dark:ring-amber-400]="showOnlyActive"
+              [class.ring-2]="showAll"
+              [class.ring-amber-500]="showAll"
+              [class.dark:ring-amber-400]="showAll"
               class="shrink-0 flex items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
         <span class="relative inline-flex h-5 w-9 rounded-full transition-colors"
-              [class.bg-amber-500]="showOnlyActive"
-              [class.dark:bg-amber-400]="showOnlyActive"
-              [class.bg-stone-300]="!showOnlyActive"
-              [class.dark:bg-stone-600]="!showOnlyActive">
+              [class.bg-amber-500]="showAll"
+              [class.dark:bg-amber-400]="showAll"
+              [class.bg-stone-300]="!showAll"
+              [class.dark:bg-stone-600]="!showAll">
           <span class="inline-block h-4 w-4 mt-0.5 ml-0.5 rounded-full bg-white shadow transition-transform"
-                [class.translate-x-5]="showOnlyActive"
-                [class.translate-x-0]="!showOnlyActive"></span>
+                [class.translate-x-5]="showAll"
+                [class.translate-x-0]="!showAll"></span>
         </span>
-        {{ showOnlyActive ? 'Solo activos' : 'Todos' }}
+        {{ showAll ? 'Todos' : 'Solo activos' }}
       </button>
     </div>
   }
@@ -68,7 +78,7 @@
       </div>
     } @else if (filteredMembers.length === 0) {
       <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
-        @if (showOnlyActive && !searchTerm.trim()) {
+        @if (!showAll && !searchTerm.trim()) {
           <p>No hay miembros activos.</p>
         } @else if (searchTerm.trim()) {
           <p>Ningún miembro coincide con «{{ searchTerm }}».</p>
