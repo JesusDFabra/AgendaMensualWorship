@@ -28,6 +28,19 @@
            class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
           Calendario El Camino
         </a>
+        @if (adminAuth.isAdmin()) {
+          <button type="button"
+                  (click)="logoutAdmin()"
+                  class="text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors">
+            Cerrar sesión (admin)
+          </button>
+        } @else {
+          <button type="button"
+                  (click)="openAdminModal()"
+                  class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+            Acceso administrador
+          </button>
+        }
         <button type="button"
                 (click)="theme.toggle()"
                 [attr.aria-label]="theme.isDark() ? 'Activar modo claro' : 'Activar modo oscuro'"
@@ -46,5 +59,45 @@
   <main class="max-w-5xl mx-auto px-4 pt-4 pb-6">
     <router-outlet />
   </main>
+
+  <!-- Modal acceso administrador -->
+  @if (showAdminModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="admin-modal-title">
+      <div class="fixed inset-0 bg-black/50" (click)="closeAdminModal()"></div>
+      <div class="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
+        <h2 id="admin-modal-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100">Acceso administrador</h2>
+        <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Ingresa la contraseña para editar canciones, agenda y calendario.</p>
+        <div class="mt-4">
+          <label for="admin-password" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Contraseña</label>
+          <input id="admin-password"
+                 type="password"
+                 [ngModel]="adminPassword()"
+                 (ngModelChange)="adminPassword.set($event); adminError.set(false)"
+                 (keydown.enter)="submitAdminLogin()"
+                 placeholder="Contraseña"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 autocomplete="current-password">
+          @if (adminError()) {
+            <p class="mt-2 text-sm text-red-600 dark:text-red-400">Contraseña incorrecta.</p>
+          }
+        </div>
+        <div class="mt-4 flex justify-end gap-2">
+          <button type="button"
+                  (click)="closeAdminModal()"
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+            Cancelar
+          </button>
+          <button type="button"
+                  (click)="submitAdminLogin()"
+                  class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
+            Entrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
   </div>
 </div>

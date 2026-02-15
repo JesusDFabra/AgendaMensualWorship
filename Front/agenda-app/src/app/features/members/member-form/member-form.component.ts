@@ -36,6 +36,26 @@ export class MemberFormComponent implements OnInit {
   alias: string | null = null;
   identificacion = '';
   fecNacimiento = '';
+  /** Desglose de fecha de nacimiento para los selectores (día 1-31, mes 1-12, año). */
+  birthDay: number | null = null;
+  birthMonth: number | null = null;
+  birthYear: number | null = null;
+
+  /** Años disponibles para fecha de nacimiento (desde 1940 hasta año actual). */
+  readonly birthYears: number[] = (() => {
+    const current = new Date().getFullYear();
+    const arr: number[] = [];
+    for (let y = current; y >= 1940; y--) arr.push(y);
+    return arr;
+  })();
+  readonly birthMonths = [
+    { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' }, { value: 3, label: 'Marzo' },
+    { value: 4, label: 'Abril' }, { value: 5, label: 'Mayo' }, { value: 6, label: 'Junio' },
+    { value: 7, label: 'Julio' }, { value: 8, label: 'Agosto' }, { value: 9, label: 'Septiembre' },
+    { value: 10, label: 'Octubre' }, { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
+  ];
+  readonly birthDays = Array.from({ length: 31 }, (_, i) => i + 1);
+
   sexoId: number | null = null;
   correo: string | null = null;
   celular: string | null = null;
@@ -90,6 +110,7 @@ export class MemberFormComponent implements OnInit {
     this.alias = m.alias ?? null;
     this.identificacion = m.identificacion ?? '';
     this.fecNacimiento = m.fecNacimiento ?? '';
+    this.parseFecNacimiento(this.fecNacimiento);
     this.sexoId = m.sexo?.id ?? null;
     this.correo = m.correo ?? null;
     this.celular = m.celular ?? null;
@@ -98,9 +119,48 @@ export class MemberFormComponent implements OnInit {
     this.observaciones = m.observaciones ?? null;
   }
 
+  /** Construye YYYY-MM-DD desde día, mes, año; devuelve '' si falta algo o la fecha no es válida. */
+  private buildFecNacimiento(): string {
+    const d = this.birthDay;
+    const m = this.birthMonth;
+    const y = this.birthYear;
+    if (d == null || m == null || y == null) return '';
+    const date = new Date(y, m - 1, d);
+    if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return '';
+    const mm = String(m).padStart(2, '0');
+    const dd = String(d).padStart(2, '0');
+    return `${y}-${mm}-${dd}`;
+  }
+
+  private parseFecNacimiento(value: string): void {
+    if (!value || value.length < 10) {
+      this.birthDay = null;
+      this.birthMonth = null;
+      this.birthYear = null;
+      return;
+    }
+    const parts = value.slice(0, 10).split('-');
+    if (parts.length !== 3) return;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    if (Number.isNaN(y) || Number.isNaN(m) || Number.isNaN(d)) return;
+    if (m < 1 || m > 12 || d < 1 || d > 31) return;
+    this.birthYear = y;
+    this.birthMonth = m;
+    this.birthDay = d;
+  }
+
   submit(): void {
     this.error = null;
     this.saving = true;
+
+    this.fecNacimiento = this.buildFecNacimiento();
+    if (!this.fecNacimiento) {
+      this.saving = false;
+      this.error = 'Selecciona una fecha de nacimiento válida (día, mes y año).';
+      return;
+    }
 
     if (this.memberId != null) {
       const member: Member = {

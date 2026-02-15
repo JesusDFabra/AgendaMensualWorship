@@ -6,8 +6,14 @@
     </a>
   </div>
 
+  @if (!adminAuth.isAdmin()) {
+    <p class="text-sm text-stone-500 dark:text-stone-400 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50 px-4 py-2">
+      Vista solo lectura. Usa «Acceso administrador» en la barra superior para editar miembros y canciones.
+    </p>
+  }
+
   @if (servicioId(); as id) {
-    <app-service-assignment-form [servicioId]="id" />
+    <app-service-assignment-form [servicioId]="id" [readOnly]="!adminAuth.isAdmin()" />
   } @else {
     <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
       <p>No se encontró el servicio.</p>

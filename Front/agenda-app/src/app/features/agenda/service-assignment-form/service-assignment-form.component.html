@@ -63,7 +63,9 @@
               <span class="text-stone-900 dark:text-stone-100 text-center cursor-help border-b border-dotted border-stone-400 dark:border-stone-500"
                     [attr.title]="slot.asignacion.nombreCompleto">{{ slot.asignacion.alias || slot.asignacion.nombreCompleto }}</span>
             } @else {
-              @if (isSelecting($index)) {
+              @if (readOnlySignal()) {
+                <span class="text-stone-400 dark:text-stone-500 text-sm">Sin asignar</span>
+              } @else if (isSelecting($index)) {
                 <div class="w-full min-w-0">
                   @if (loadingDisponibles()) {
                     <span class="text-sm text-stone-500 dark:text-stone-400">Cargando…</span>
@@ -110,21 +112,23 @@
               }
             }
           </div>
-          @if (slot.asignacion) {
-            <button type="button"
-                    (click)="remove($index)"
-                    [disabled]="updating() !== null"
-                    class="text-sm text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50 justify-self-end">
-              Quitar
-            </button>
-          } @else if (!isSelecting($index)) {
-            <button type="button"
-                    (click)="openSelector($index)"
-                    class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors justify-self-end">
-              Asignar
-            </button>
-          } @else {
-            <span class="w-12"></span>
+          @if (!readOnlySignal()) {
+            @if (slot.asignacion) {
+              <button type="button"
+                      (click)="remove($index)"
+                      [disabled]="updating() !== null"
+                      class="text-sm text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50 justify-self-end">
+                Quitar
+              </button>
+            } @else if (!isSelecting($index)) {
+              <button type="button"
+                      (click)="openSelector($index)"
+                      class="rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors justify-self-end">
+                Asignar
+              </button>
+            } @else {
+              <span class="w-12"></span>
+            }
           }
         </li>
       }
@@ -132,6 +136,7 @@
   </section>
   } @else if (effectiveTab() === 'canciones') {
   <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden p-4">
+    @if (!readOnlySignal()) {
     <div class="mb-4 p-4 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50">
       <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
         {{ editingCancionId() ? 'Editar directores' : 'Agregar canción al servicio' }}
@@ -266,6 +271,7 @@
         }
       </div>
     </div>
+    }
 
     @if (loadingCanciones()) {
       <p class="text-sm text-stone-500 dark:text-stone-400 py-4">Cargando canciones…</p>
@@ -287,19 +293,21 @@
               }
               <div class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Dirige: {{ directoresDisplay(c) }}</div>
             </div>
-            <div class="flex gap-2">
-              <button type="button"
-                      (click)="editCancion(c)"
-                      class="text-sm text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400">
-                Editar
-              </button>
-              <button type="button"
-                      (click)="deleteCancion(c)"
-                      [disabled]="savingCancion()"
-                      class="text-sm text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50">
-                Eliminar
-              </button>
-            </div>
+            @if (!readOnlySignal()) {
+              <div class="flex gap-2">
+                <button type="button"
+                        (click)="editCancion(c)"
+                        class="text-sm text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400">
+                  Editar
+                </button>
+                <button type="button"
+                        (click)="deleteCancion(c)"
+                        [disabled]="savingCancion()"
+                        class="text-sm text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50">
+                  Eliminar
+                </button>
+              </div>
+            }
           </li>
         }
       </ul>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MemberService, Member } from '../../../core/services/member.service';
+import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { MemberFormComponent } from '../member-form/member-form.component';
 
 @Component({
@@ -24,6 +25,11 @@ export class MemberListComponent implements OnInit {
   error: string | null = null;
   /** Criterio de ordenación (por defecto apellidos). */
   sortBy: 'apellido' | 'nombreCompleto' | 'alias' | 'rol' = 'apellido';
+
+  constructor(
+    private memberService: MemberService,
+    public adminAuth: AdminAuthService,
+  ) {}
 
   get filteredMembers(): Member[] {
     let list = this.members;
@@ -75,8 +81,6 @@ export class MemberListComponent implements OnInit {
     const start = (this.currentPage - 1) * this.pageSize;
     return this.filteredMembers.slice(start, start + this.pageSize);
   }
-
-constructor(private memberService: MemberService) {}
 
 goToPage(page: number): void {
   this.currentPage = Math.max(1, Math.min(page, this.totalPages));

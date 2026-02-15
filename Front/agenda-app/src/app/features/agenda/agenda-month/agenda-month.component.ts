@@ -8,6 +8,7 @@ import { AsignacionService, Asignacion } from '../../../core/services/asignacion
 import { ServicioCancionService, ServicioCancion } from '../../../core/services/servicio-cancion.service';
 import { ServiceAssignmentFormComponent } from '../service-assignment-form/service-assignment-form.component';
 import { AGENDA_SLOTS } from '../agenda-slots';
+import { AdminAuthService } from '../../../core/services/admin-auth.service';
 
 type DayWithAsignaciones = {
   servicio: Servicio;
@@ -53,6 +54,7 @@ export class AgendaMonthComponent implements OnInit {
     private servicioService: ServicioService,
     private asignacionService: AsignacionService,
     private servicioCancionService: ServicioCancionService,
+    public adminAuth: AdminAuthService,
   ) {}
 
   ngOnInit(): void {

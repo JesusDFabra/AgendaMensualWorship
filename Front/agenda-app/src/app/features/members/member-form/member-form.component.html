@@ -58,9 +58,30 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label for="fecNacimiento" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Fecha de nacimiento <span class="text-red-500">*</span></label>
-          <input id="fecNacimiento" type="date" [(ngModel)]="fecNacimiento" name="fecNacimiento" required
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+          <span class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Fecha de nacimiento <span class="text-red-500">*</span></span>
+          <div class="flex gap-2 mt-1">
+            <select [(ngModel)]="birthDay" name="birthDay" required
+                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              <option [ngValue]="null">Día</option>
+              @for (d of birthDays; track d) {
+                <option [ngValue]="d">{{ d }}</option>
+              }
+            </select>
+            <select [(ngModel)]="birthMonth" name="birthMonth" required
+                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              <option [ngValue]="null">Mes</option>
+              @for (m of birthMonths; track m.value) {
+                <option [ngValue]="m.value">{{ m.label }}</option>
+              }
+            </select>
+            <select [(ngModel)]="birthYear" name="birthYear" required
+                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              <option [ngValue]="null">Año</option>
+              @for (y of birthYears; track y) {
+                <option [ngValue]="y">{{ y }}</option>
+              }
+            </select>
+          </div>
         </div>
         <div>
           <label for="sexo" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Sexo <span class="text-red-500">*</span></label>

@@ -38,6 +38,11 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   @Input() servicioId!: number;
   @Input() servicio: Servicio | null = null;
   @Input() showHeader = true;
+  /** Vista solo lectura: se muestran miembros y canciones pero no se pueden editar. */
+  @Input() set readOnly(value: boolean) {
+    this.readOnlySignal.set(!!value);
+  }
+  readOnlySignal = signal(false);
   /** Si se pasa (p. ej. desde la vista del mes), se usan de inmediato y no se pide la lista al backend. */
   @Input() initialAsignaciones: Asignacion[] | null = null;
   /** Se emite cuando el usuario modifica miembros (asignar/quitar) o canciones (agregar/editar/eliminar) para que el padre recargue. */

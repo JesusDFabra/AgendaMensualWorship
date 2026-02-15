@@ -9,7 +9,11 @@
   <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-3 shadow-sm">
     <h1 class="text-xl font-bold text-stone-800 dark:text-stone-100">Calendario de la iglesia El Camino</h1>
     <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
-      Días en que hay servicio en la iglesia. Selecciona los días: clic para activar o desactivar.
+      @if (adminAuth.isAdmin()) {
+        Días en que hay servicio en la iglesia. Selecciona los días: clic para activar o desactivar.
+      } @else {
+        Días en que hay servicio en la iglesia. Solo lectura; inicia sesión como administrador para modificar.
+      }
     </p>
   </header>
 
@@ -50,7 +54,7 @@
           } @else {
             <button type="button"
                     (click)="toggleDay(cell)"
-                    [disabled]="isUpdating(cell.dateStr)"
+                    [disabled]="!adminAuth.isAdmin() || isUpdating(cell.dateStr)"
                     [attr.aria-pressed]="!!cell.servicio"
                     [attr.aria-label]="cell.servicio ? 'Quitar servicio el día ' + cell.day : 'Agregar servicio el día ' + cell.day"
                     class="aspect-[2/1] rounded-lg text-sm font-medium transition-all min-w-0 flex items-center justify-center
@@ -69,7 +73,10 @@
       </div>
 
       <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
-        Días en naranja = hay servicio en la iglesia El Camino. Clic en un día para activar o desactivar.
+        Días en naranja = hay servicio en la iglesia El Camino.
+        @if (adminAuth.isAdmin()) {
+          Clic en un día para activar o desactivar.
+        }
       </p>
     </section>
   }

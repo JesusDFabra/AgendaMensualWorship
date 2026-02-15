@@ -3,6 +3,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CancionService, Cancion } from '../../core/services/cancion.service';
+import { AdminAuthService } from '../../core/services/admin-auth.service';
 
 @Component({
   selector: 'app-cancion-list',
@@ -25,6 +26,11 @@ export class CancionListComponent implements OnInit {
   /** Id de la canción a eliminar (para confirmación). */
   deletingId = signal<number | null>(null);
 
+  constructor(
+    private cancionService: CancionService,
+    public adminAuth: AdminAuthService,
+  ) {}
+
   filteredCanciones = computed(() => {
     const list = this.canciones();
     const q = this.searchQuery().trim().toLowerCase();
@@ -35,8 +41,6 @@ export class CancionListComponent implements OnInit {
         (c.autor ?? '').toLowerCase().includes(q)
     );
   });
-
-  constructor(private cancionService: CancionService) {}
 
   ngOnInit(): void {
     this.load();

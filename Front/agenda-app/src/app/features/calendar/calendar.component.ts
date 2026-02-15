@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ServicioService, Servicio } from '../../core/services/servicio.service';
+import { AdminAuthService } from '../../core/services/admin-auth.service';
 
 type DayCell = { day: number | null; dateStr: string | null; servicio: Servicio | null };
 
@@ -17,6 +18,11 @@ export class CalendarComponent implements OnInit {
   services = signal<Servicio[]>([]);
   loading = signal(true);
   updating = signal<string | null>(null); // dateStr being toggled
+
+  constructor(
+    private servicioService: ServicioService,
+    public adminAuth: AdminAuthService,
+  ) {}
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -63,8 +69,6 @@ export class CalendarComponent implements OnInit {
   });
 
   weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-
-  constructor(private servicioService: ServicioService) {}
 
   ngOnInit(): void {
     this.loadServices();

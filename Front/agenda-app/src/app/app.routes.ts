@@ -24,7 +24,7 @@ export const routes: Routes = [
   {
     path: 'agenda',
     loadComponent: () =>
-      import('./features/agenda/agenda-list/agenda-list.component').then((m) => m.AgendaListComponent),
+      import('./features/agenda/agenda-redirect/agenda-redirect.component').then((m) => m.AgendaRedirectComponent),
   },
   {
     path: 'agenda/mes/:year/:month',
