@@ -21,6 +21,8 @@ export class AgendaListComponent implements OnInit {
   selectedServicio = signal<Servicio | null>(null);
   /** Pestaña activa en el modal (siempre visible en la cabecera) */
   modalTab = signal<'miembros' | 'canciones'>('miembros');
+  /** Si hubo cambios en el modal (miembros o canciones) para recargar al cerrar */
+  hasChangesInModal = false;
 
   private readonly monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -117,8 +119,16 @@ export class AgendaListComponent implements OnInit {
   }
 
   closeAssignmentModal(): void {
+    if (this.hasChangesInModal) {
+      this.loadServices();
+      this.hasChangesInModal = false;
+    }
     this.selectedServicio.set(null);
     this.modalTab.set('miembros');
+  }
+
+  onServicioChanged(): void {
+    this.hasChangesInModal = true;
   }
 
   setModalTab(tab: 'miembros' | 'canciones'): void {

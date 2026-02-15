@@ -32,7 +32,7 @@ export class AgendaMonthComponent implements OnInit {
   modalTab = signal<'miembros' | 'canciones'>('miembros');
   /** Asignaciones ya cargadas del mes; se pasan al modal para no volver a pedirlas. */
   selectedInitialAsignaciones = signal<Asignacion[] | null>(null);
-  /** True si en el modal se asignó o quitó a alguien; solo entonces recargamos el mes al cerrar. */
+  /** True si en el modal se modificaron miembros o canciones; solo entonces recargamos el mes al cerrar. */
   hasChangesInModal = false;
 
   private readonly monthNames = [

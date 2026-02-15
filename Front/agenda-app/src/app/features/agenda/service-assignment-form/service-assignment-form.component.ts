@@ -40,7 +40,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   @Input() showHeader = true;
   /** Si se pasa (p. ej. desde la vista del mes), se usan de inmediato y no se pide la lista al backend. */
   @Input() initialAsignaciones: Asignacion[] | null = null;
-  /** Se emite cuando el usuario asigna o quita a alguien (para que el padre sepa si recargar). */
+  /** Se emite cuando el usuario modifica miembros (asignar/quitar) o canciones (agregar/editar/eliminar) para que el padre recargue. */
   @Output() asignacionesChanged = new EventEmitter<void>();
   /** Si el padre controla la pestaña (p. ej. en el modal), no se muestra la barra de pestañas aquí. */
   activeTabInput = signal<'miembros' | 'canciones' | null>(null);
@@ -55,8 +55,24 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   notFound = signal(false);
   selectingSlot = signal<number | null>(null);
   disponibles = signal<Member[]>([]);
+  /** Texto del buscador al elegir miembro para un rol (filtra por nombre o alias). */
+  memberSearchQuery = signal('');
   loadingDisponibles = signal(false);
   updating = signal<string | null>(null);
+
+  /** Miembros disponibles filtrados por nombre o alias según memberSearchQuery. */
+  filteredDisponibles = computed(() => {
+    const q = this.memberSearchQuery().trim().toLowerCase();
+    const list = this.disponibles();
+    if (!q) return list;
+    return list.filter((m) => {
+      const nombre = (m.nombre ?? '').toLowerCase();
+      const apellido = (m.apellido ?? '').toLowerCase();
+      const alias = (m.alias ?? '').toLowerCase();
+      const full = `${nombre} ${apellido}`.trim();
+      return full.includes(q) || alias.includes(q) || nombre.includes(q) || apellido.includes(q);
+    });
+  });
 
   slots = computed<SlotState[]>(() => {
     const list = this.asignaciones();
@@ -212,6 +228,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   openSelector(slotIndex: number): void {
     const slot = this.slots()[slotIndex];
     this.selectingSlot.set(slotIndex);
+    this.memberSearchQuery.set('');
     this.loadingDisponibles.set(true);
     this.asignacionService.getDisponibles(this.servicioId, slot.rolId).subscribe({
       next: (members) => {
@@ -225,6 +242,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   closeSelector(): void {
     this.selectingSlot.set(null);
     this.disponibles.set([]);
+    this.memberSearchQuery.set('');
   }
 
   assign(slotIndex: number, miembro: Member): void {
@@ -370,6 +388,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
           this.resetFormCancion();
           this.loadCanciones();
           this.savingCancion.set(false);
+          this.asignacionesChanged.emit();
         },
         error: () => this.savingCancion.set(false),
       });
@@ -388,6 +407,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
           this.canciones.update(list => [...list, creada]);
           this.resetFormCancion();
           this.savingCancion.set(false);
+          this.asignacionesChanged.emit();
         },
         error: (err) => {
           this.savingCancion.set(false);
@@ -414,6 +434,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
               this.canciones.update(list => [...list, creada]);
               this.resetFormCancion();
               this.savingCancion.set(false);
+              this.asignacionesChanged.emit();
             },
             error: (err) => {
               this.savingCancion.set(false);
@@ -449,6 +470,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
         this.loadCanciones();
         if (this.editingCancionId() === c.id) this.resetFormCancion();
         this.savingCancion.set(false);
+        this.asignacionesChanged.emit();
       },
       error: () => this.savingCancion.set(false),
     });

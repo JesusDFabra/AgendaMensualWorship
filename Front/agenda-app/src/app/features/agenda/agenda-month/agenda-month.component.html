@@ -70,8 +70,13 @@
                     <ul class="space-y-2 text-sm">
                       @for (c of day.canciones; track c.id) {
                         <li>
-                          <div class="text-stone-500 dark:text-stone-400">Dirige: {{ directoresDisplay(c) }}</div>
-                          <div class="text-stone-800 dark:text-stone-200">{{ c.cancionNombre ?? '—' }}@if (c.cancionAutor) { — {{ c.cancionAutor }} }</div>
+                          <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-stone-800 dark:text-stone-200">{{ c.cancionNombre ?? '—' }}@if (c.cancionAutor) { — {{ c.cancionAutor }} }</span>
+                            @if (c.cancionEnlace) {
+                              <a [href]="c.cancionEnlace" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 hover:underline shrink-0">Enlace</a>
+                            }
+                          </div>
+                          <div class="text-stone-500 dark:text-stone-400 text-xs mt-0.5">Dirige: {{ directoresDisplay(c) }}</div>
                         </li>
                       }
                     </ul>
