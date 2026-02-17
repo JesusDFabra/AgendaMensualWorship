@@ -1,11 +1,11 @@
-FROM eclipse-temurin17-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 
-WORKDIR app
+WORKDIR /app
 
 COPY . .
 
-RUN .mvnw clean package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
 
-CMD [java, -jar, target.jar]
+CMD ["java", "-jar", "target/*.jar"]
