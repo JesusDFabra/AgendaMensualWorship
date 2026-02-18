@@ -14,6 +14,8 @@ export class AppComponent {
   showAdminModal = signal(false);
   adminPassword = signal('');
   adminError = signal(false);
+  /** Menú móvil abierto (hamburguesa). */
+  mobileMenuOpen = signal(false);
 
   constructor(
     public theme: ThemeService,
@@ -43,5 +45,13 @@ export class AppComponent {
 
   logoutAdmin(): void {
     this.adminAuth.logoutAdmin();
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((v) => !v);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 }

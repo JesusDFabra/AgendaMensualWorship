@@ -3,10 +3,12 @@
   <!-- Navegación -->
   <header class="border-b border-stone-200 dark:border-stone-700 bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm sticky top-0 z-10 transition-colors">
     <nav class="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between">
-      <a routerLink="/" class="text-xl font-semibold text-stone-800 dark:text-stone-100 tracking-tight">
+      <a routerLink="/" (click)="closeMobileMenu()" class="text-xl font-semibold text-stone-800 dark:text-stone-100 tracking-tight shrink-0">
         Agenda Worship
       </a>
-      <div class="flex items-center gap-4">
+
+      <!-- Escritorio: enlaces en fila -->
+      <div class="hidden md:flex items-center gap-4">
         <a routerLink="/" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium" [routerLinkActiveOptions]="{ exact: true }"
            class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
           Inicio
@@ -15,7 +17,6 @@
            class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
           Miembros
         </a>
-        
         <a routerLink="/agenda" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
            class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
           Agenda Mensual
@@ -52,7 +53,82 @@
           }
         </button>
       </div>
+
+      <!-- Móvil: botón hamburguesa + tema -->
+      <div class="flex md:hidden items-center gap-1">
+        <button type="button"
+                (click)="theme.toggle()"
+                [attr.aria-label]="theme.isDark() ? 'Activar modo claro' : 'Activar modo oscuro'"
+                class="rounded-lg p-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
+          @if (theme.isDark()) {
+            <span class="text-lg" aria-hidden="true">☀️</span>
+          } @else {
+            <span class="text-lg" aria-hidden="true">🌙</span>
+          }
+        </button>
+        <button type="button"
+                (click)="toggleMobileMenu()"
+                [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+                [attr.aria-expanded]="mobileMenuOpen()"
+                class="rounded-lg p-2.5 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
+          @if (mobileMenuOpen()) {
+            <span class="text-xl leading-none" aria-hidden="true">✕</span>
+          } @else {
+            <span class="flex flex-col gap-1" aria-hidden="true">
+              <span class="block w-5 h-0.5 bg-current rounded"></span>
+              <span class="block w-5 h-0.5 bg-current rounded"></span>
+              <span class="block w-5 h-0.5 bg-current rounded"></span>
+            </span>
+          }
+        </button>
+      </div>
     </nav>
+
+    <!-- Menú móvil desplegable -->
+    @if (mobileMenuOpen()) {
+      <div class="md:hidden border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800/95 backdrop-blur-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-1">
+          <a routerLink="/" (click)="closeMobileMenu()"
+             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium" [routerLinkActiveOptions]="{ exact: true }"
+             class="py-2.5 px-3 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+            Inicio
+          </a>
+          <a routerLink="/miembros" (click)="closeMobileMenu()"
+             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             class="py-2.5 px-3 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+            Miembros
+          </a>
+          <a routerLink="/agenda" (click)="closeMobileMenu()"
+             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             class="py-2.5 px-3 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+            Agenda Mensual
+          </a>
+          <a routerLink="/canciones" (click)="closeMobileMenu()"
+             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             class="py-2.5 px-3 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+            Canciones
+          </a>
+          <a routerLink="/calendario" (click)="closeMobileMenu()"
+             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             class="py-2.5 px-3 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+            Calendario El Camino
+          </a>
+          @if (adminAuth.isAdmin()) {
+            <button type="button"
+                    (click)="logoutAdmin(); closeMobileMenu()"
+                    class="py-2.5 px-3 rounded-lg text-left text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+              Cerrar sesión (admin)
+            </button>
+          } @else {
+            <button type="button"
+                    (click)="openAdminModal(); closeMobileMenu()"
+                    class="py-2.5 px-3 rounded-lg text-left text-sm font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+              Acceso administrador
+            </button>
+          }
+        </div>
+      </div>
+    }
   </header>
 
   <!-- Contenido principal -->
