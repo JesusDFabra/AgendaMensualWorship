@@ -462,7 +462,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     if (status === 404) return `No se encontró el servicio o la canción.`;
     if (status === 400) return msg || `Datos incorrectos (${accion}).`;
     if (status === 500) return `Error del servidor al ${accion}. Revisa que la tabla servicio_cancion exista en la base de datos.`;
-    if (status === 0) return `No se pudo conectar. Comprueba que el backend esté en marcha (puerto 8081).`;
+    if (status === 0) return `No se pudo conectar con el servidor. Comprueba tu conexión o inténtalo más tarde.`;
     return msg || `No se pudo ${accion}. Código: ${status ?? 'desconocido'}.`;
   }
 

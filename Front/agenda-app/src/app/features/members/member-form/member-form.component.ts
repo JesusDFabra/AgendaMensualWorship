@@ -97,7 +97,7 @@ export class MemberFormComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.error = err?.message || 'No se pudieron cargar sexos y roles. ¿Está el backend en marcha (puerto 8081)?';
+          this.error = err?.message || 'No se pudieron cargar sexos y roles. Comprueba tu conexión o inténtalo más tarde.';
           this.loading = false;
         },
       });

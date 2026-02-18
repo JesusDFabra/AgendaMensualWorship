@@ -125,7 +125,7 @@ readonly Math = Math;
         this.loading = false;
       },
       error: (err: unknown) => {
-        this.error = err instanceof Error ? err.message : 'No se pudo cargar el listado. ¿Está el backend en marcha (puerto 8081)?';
+        this.error = err instanceof Error ? err.message : 'No se pudo cargar el listado. Comprueba tu conexión o inténtalo más tarde.';
         this.loading = false;
       },
     });
