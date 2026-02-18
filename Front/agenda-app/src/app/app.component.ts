@@ -1,8 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 import { ThemeService } from './core/services/theme.service';
 import { AdminAuthService } from './core/services/admin-auth.service';
+import { BrandService } from './core/services/brand.service';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +12,7 @@ import { AdminAuthService } from './core/services/admin-auth.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   showAdminModal = signal(false);
   adminPassword = signal('');
   adminError = signal(false);
@@ -20,7 +22,13 @@ export class AppComponent {
   constructor(
     public theme: ThemeService,
     public adminAuth: AdminAuthService,
+    public brand: BrandService,
+    private title: Title,
   ) {}
+
+  ngOnInit(): void {
+    this.title.setTitle(this.brand.appName);
+  }
 
   openAdminModal(): void {
     this.adminPassword.set('');

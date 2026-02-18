@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { BrandService } from '../../core/services/brand.service';
 
 @Component({
   selector: 'app-home',
@@ -7,4 +8,6 @@ import { RouterLink } from '@angular/router';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent {}
+export class HomeComponent {
+  constructor(public brand: BrandService) {}
+}

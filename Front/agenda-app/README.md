@@ -39,6 +39,20 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+### Dos versiones de la app (branding)
+
+El mismo código puede generarse en dos “versiones”:
+
+| Versión | Uso | Comando | Salida |
+|--------|-----|---------|--------|
+| **Agenda Worship** (general) | Cualquier iglesia/equipo | `ng build` o `npm run build` | `dist/agenda-app/` |
+| **El Camino Worship** | Iglesia El Camino – ministerio de alabanza | `npm run build:elcamino` | `dist/elcamino-worship-app/` |
+
+- La versión **general** muestra el nombre “Agenda Worship” y textos genéricos.
+- La versión **El Camino** muestra “El Camino Worship”, el tagline “Ministerio de alabanza - Iglesia El Camino” y descripciones adaptadas.
+
+Ambas usan la misma API y funcionalidad; solo cambia el branding (nombre, tagline, textos del hero). Para desplegar en Vercel puedes crear dos proyectos: uno con build `npm run build` y otro con `npm run build:elcamino`, apuntando cada uno a su carpeta de salida (`dist/agenda-app` y `dist/elcamino-worship-app`).
+
 ## Running unit tests
 
 To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
