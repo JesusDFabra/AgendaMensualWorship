@@ -17,134 +17,93 @@
         Volver al listado
       </a>
     </div>
-  } @else if (editUnlocked) {
-    <app-member-form [memberId]="member.id"
-                     (saved)="onMemberSaved()"
-                     (cancelled)="editUnlocked = false"></app-member-form>
   } @else {
-    <!-- Cabecera: nombre de la persona -->
-    <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400 flex flex-wrap items-start justify-between gap-4">
-      <div class="min-w-0">
-        <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
-          {{ member.nombre }} {{ member.apellido }}
-        </h1>
-        @if (member.alias) {
-          <p class="mt-1 text-lg text-stone-600 dark:text-stone-300 font-medium">«{{ member.alias }}»</p>
-        }
-        <div class="mt-3 flex items-center gap-2">
-          <span [ngClass]="{
-            'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium': true,
-            'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': member.activo,
-            'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400': !member.activo
-          }">
-            {{ member.activo ? 'Activo' : 'Inactivo' }}
-          </span>
-          @if (member.rol?.nombre) {
-            <span class="text-sm text-stone-500 dark:text-stone-400">· {{ member.rol?.nombre }}</span>
+    <!-- Fila: datos del miembro (30 %) a la izquierda, Próximos servicios (70 %) a la derecha -->
+    <div class="grid grid-cols-1 md:grid-cols-[30%_1fr] gap-4 items-start">
+      <!-- Izquierda (30 %): título + datos personales -->
+      <header class="min-w-0 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+          <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight leading-tight">
+              {{ member.nombre }} {{ member.apellido }}
+            </h1>
+            @if (member.alias) {
+              <p class="mt-1 text-base text-stone-600 dark:text-stone-300 font-medium">«{{ member.alias }}»</p>
+            }
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span [ngClass]="{
+                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium': true,
+                'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': member.activo,
+                'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400': !member.activo
+              }">
+                {{ member.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+              @if (member.rol?.nombre) {
+                <span class="text-xs text-stone-500 dark:text-stone-400">· {{ member.rol?.nombre }}</span>
+              }
+            </div>
+          </div>
+          @if (!editUnlocked) {
+            <button type="button"
+                    (click)="openEditModal()"
+                    class="shrink-0 rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-3 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
+              Editar
+            </button>
           }
         </div>
-      </div>
-      @if (!editUnlocked) {
-        <button type="button"
-                (click)="openEditModal()"
-                class="shrink-0 rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
-          Editar
-        </button>
-      }
-    </header>
 
-    <!-- Datos básicos -->
-    <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
-      <h2 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-2">Datos de la persona</h2>
-      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Nombre completo</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.nombre }} {{ member.apellido }}</dd>
-        </div>
-        @if (member.alias) {
-          <div>
-            <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Alias</dt>
-            <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.alias }}</dd>
-          </div>
-        }
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Fecha de nacimiento</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ formatDate(member.fecNacimiento) }}</dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Sexo</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.sexo?.descripcion ?? '—' }}</dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Rol</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.rol?.nombre ?? '—' }}</dd>
-        </div>
-        <div class="sm:col-span-3">
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1">Estado</dt>
-          <dd class="mt-0.5 flex items-center gap-2">
-            <button type="button"
-                    (click)="onToggleActivoClick()"
-                    [disabled]="updatingActivo"
-                    [class.ring-2]="member.activo"
-                    [class.ring-green-500]="member.activo"
-                    [class.dark:ring-green-400]="member.activo"
-                    class="shrink-0 flex items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors disabled:opacity-50">
-              <span class="relative inline-flex h-5 w-9 rounded-full transition-colors"
-                    [class.bg-green-500]="member.activo"
-                    [class.dark:bg-green-400]="member.activo"
-                    [class.bg-stone-300]="!member.activo"
-                    [class.dark:bg-stone-600]="!member.activo">
-                <span class="inline-block h-4 w-4 mt-0.5 ml-0.5 rounded-full bg-white shadow transition-transform"
-                      [class.translate-x-5]="member.activo"
-                      [class.translate-x-0]="!member.activo"></span>
+        <ul class="flex flex-col gap-3 text-sm" role="list">
+          <li class="flex items-center gap-3">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" aria-hidden="true">
+              <i class="fi fi-rr-calendar text-lg"></i>
+            </span>
+            <span class="min-w-0 flex-1 text-stone-900 dark:text-stone-100">{{ formatDate(member.fecNacimiento) }}</span>
+          </li>
+          @if (member.correo) {
+            <li class="flex items-center gap-3">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" aria-hidden="true">
+                <i class="fi fi-rr-envelope text-lg"></i>
               </span>
-              {{ member.activo ? 'Activo' : 'Inactivo' }}
-            </button>
-            @if (updatingActivo) {
-              <span class="text-xs text-stone-500 dark:text-stone-400">Guardando…</span>
-            }
-          </dd>
-        </div>
-        @if (member.correo) {
-          <div class="sm:col-span-3">
-            <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Correo</dt>
-            <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.correo }}</dd>
-          </div>
-        }
-        @if (member.celular) {
-          <div>
-            <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Celular</dt>
-            <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.celular }}</dd>
-          </div>
-        }
-      </dl>
-    </section>
-
-    <!-- Próximos servicios en los que está asignado -->
-    <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
-      <h2 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">Próximos servicios</h2>
-      @if (loadingProximosServicios) {
-        <p class="text-sm text-stone-500 dark:text-stone-400">Cargando…</p>
-      } @else if (proximosServicios.length === 0) {
-        <p class="text-sm text-stone-500 dark:text-stone-400">No tiene servicios asignados a partir de hoy.</p>
-      } @else {
-        <ul class="space-y-2">
-          @for (s of proximosServicios; track s.servicioId) {
-            <li>
-              <button type="button"
-                      (click)="openServiceView(s.servicioId)"
-                      class="w-full flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-700/30 px-3 py-2 text-sm font-medium text-stone-800 dark:text-stone-200 hover:bg-amber-50 hover:border-amber-200 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors text-left">
-                <span>{{ formatDateLong(s.fecha) }}</span>
-                @if (s.rolNombre) {
-                  <span class="text-stone-500 dark:text-stone-400">· {{ s.rolNombre }}</span>
-                }
-                <span class="ml-auto text-amber-600 dark:text-amber-400 text-xs">Ver servicio →</span>
-              </button>
+              <span class="min-w-0 flex-1 break-all text-stone-900 dark:text-stone-100">{{ member.correo }}</span>
+            </li>
+          }
+          @if (member.celular) {
+            <li class="flex items-center gap-3">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" aria-hidden="true">
+                <i class="fi fi-rr-smartphone text-lg"></i>
+              </span>
+              <span class="min-w-0 flex-1 text-stone-900 dark:text-stone-100">{{ member.celular }}</span>
             </li>
           }
         </ul>
-      }
-    </section>
+      </header>
+
+      <!-- Derecha (70 %): Próximos servicios -->
+      <section class="min-w-0 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">Próximos servicios</h2>
+        @if (loadingProximosServicios) {
+          <p class="text-sm text-stone-500 dark:text-stone-400">Cargando…</p>
+        } @else if (proximosServicios.length === 0) {
+          <p class="text-sm text-stone-500 dark:text-stone-400">No tiene servicios asignados a partir de hoy.</p>
+        } @else {
+          <ul class="space-y-2">
+            @for (s of proximosServicios; track s.servicioId) {
+              <li>
+                <button type="button"
+                        (click)="openServiceView(s.servicioId)"
+                        class="w-full flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-700/30 px-3 py-2 text-sm font-medium text-stone-800 dark:text-stone-200 hover:bg-amber-50 hover:border-amber-200 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors text-left">
+                  <span>{{ formatDateLong(s.fecha) }}</span>
+                  @if (s.rolNombre) {
+                    <span class="text-stone-500 dark:text-stone-400">· {{ s.rolNombre }}</span>
+                  }
+                  <span class="ml-auto text-amber-600 dark:text-amber-400 text-xs">Ver servicio →</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
 
     <!-- Modal ver detalle del servicio (solo lectura) -->
     @if (selectedServicioIdForView !== null) {
@@ -152,87 +111,54 @@
                               (closed)="selectedServicioIdForView = null" />
     }
 
-    <!-- Modal confirmar cambio de estado con documento -->
-    @if (showConfirmActivo) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
-           role="dialog"
-           aria-modal="true"
-           aria-labelledby="confirm-activo-title">
-        <div class="fixed inset-0 bg-black/50"
-             (click)="closeConfirmActivo()"></div>
-        <div class="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
-          <h3 id="confirm-activo-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">
-            Confirmar cambio de estado
-          </h3>
-          <p class="text-sm text-stone-600 dark:text-stone-400 mb-4">
-            Para {{ member.activo ? 'desactivar' : 'activar' }} a <strong>{{ member.nombre }} {{ member.apellido }}</strong>, ingresa su número de documento.
-          </p>
-          <label for="confirm-doc" class="sr-only">Número de documento</label>
-          <input id="confirm-doc"
-                 type="password"
-                 autocomplete="off"
-                 [(ngModel)]="confirmActivoDocumento"
-                 name="confirmActivoDocumento"
-                 placeholder="Número de documento"
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-3"
-                 (keydown.enter)="confirmAndToggleActivo()">
-          @if (confirmActivoError) {
-            <p class="text-sm text-red-600 dark:text-red-400 mb-3">{{ confirmActivoError }}</p>
-          }
-          <div class="flex gap-3 justify-end">
-            <button type="button"
-                    (click)="closeConfirmActivo()"
-                    [disabled]="updatingActivo"
-                    class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:opacity-50">
-              Cancelar
-            </button>
-            <button type="button"
-                    (click)="confirmAndToggleActivo()"
-                    [disabled]="updatingActivo"
-                    class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
-              {{ updatingActivo ? 'Guardando…' : 'Confirmar' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- Modal verificar documento para editar -->
+    <!-- Modal editar: documento o formulario -->
     @if (showEditModal) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
            role="dialog"
            aria-modal="true"
-           aria-labelledby="edit-modal-title">
+           [attr.aria-labelledby]="editUnlocked ? null : 'edit-modal-title'">
         <div class="fixed inset-0 bg-black/50" (click)="closeEditModal()"></div>
-        <div class="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
-          <h3 id="edit-modal-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">Editar datos de «{{ member.nombre }} {{ member.apellido }}»</h3>
-          <p class="text-sm text-stone-600 dark:text-stone-400 mb-4">
-            Ingresa el número de documento para poder editar cualquier campo.
-          </p>
-          <label for="edit-doc" class="sr-only">Numero de documento</label>
-          <input id="edit-doc"
-                 type="password"
-                 autocomplete="off"
-                 [(ngModel)]="editDocumento"
-                 name="editDocumento"
-                 placeholder="Número de documento"
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-3"
-                 (keydown.enter)="confirmEditDocumento()">
-          @if (editDocError) {
-            <p class="text-sm text-red-600 dark:text-red-400 mb-3">{{ editDocError }}</p>
+        <div class="relative z-10 w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-xl"
+             (click)="$event.stopPropagation()">
+          @if (!editUnlocked) {
+            <div class="p-4">
+              <h3 id="edit-modal-title" class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1.5">Editar datos de «{{ member.nombre }} {{ member.apellido }}»</h3>
+              <p class="text-sm text-stone-600 dark:text-stone-400 mb-3">
+                Ingresa el número de documento para poder editar cualquier campo.
+              </p>
+              <label for="edit-doc" class="sr-only">Numero de documento</label>
+              <input id="edit-doc"
+                     type="password"
+                     autocomplete="off"
+                     [(ngModel)]="editDocumento"
+                     name="editDocumento"
+                     placeholder="Número de documento"
+                     class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-3"
+                     (keydown.enter)="confirmEditDocumento()">
+              @if (editDocError) {
+                <p class="text-sm text-red-600 dark:text-red-400 mb-3">{{ editDocError }}</p>
+              }
+              <div class="flex gap-3 justify-end">
+                <button type="button"
+                        (click)="closeEditModal()"
+                        class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
+                  Cancelar
+                </button>
+                <button type="button"
+                        (click)="confirmEditDocumento()"
+                        class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
+                  Continuar
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="p-3">
+              <app-member-form [memberId]="member.id"
+                               [isModal]="true"
+                               (saved)="onMemberSaved()"
+                               (cancelled)="onEditCancelled()"></app-member-form>
+            </div>
           }
-          <div class="flex gap-3 justify-end">
-            <button type="button"
-                    (click)="closeEditModal()"
-                    class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700">
-              Cancelar
-            </button>
-            <button type="button"
-                    (click)="confirmEditDocumento()"
-                    class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
-              Continuar
-            </button>
-          </div>
         </div>
       </div>
     }

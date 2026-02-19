@@ -23,37 +23,66 @@
     <!-- Miembros -->
     <a routerLink="/miembros"
        class="group flex flex-col items-center gap-2 p-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-600 hover:-translate-y-0.5 transition-all duration-200">
-      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
-            aria-hidden="true">👥</span>
+      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl text-amber-700 dark:text-amber-300 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
+            aria-hidden="true"><i class="fi fi-rr-member-list"></i></span>
       <span class="font-semibold text-stone-800 dark:text-stone-200 group-hover:text-amber-700 dark:group-hover:text-amber-400">Miembros</span>
-      <span class="text-sm text-stone-500 dark:text-stone-400 text-center">Ver y gestionar el equipo</span>
+      <span class="text-sm text-stone-500 dark:text-stone-400 text-center">Ver mis servicios y gestionar disponibilidad</span>
     </a>
     
     <!-- Agenda Mensual -->
     <a routerLink="/agenda"
        class="group flex flex-col items-center gap-2 p-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-600 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
-      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
-            aria-hidden="true">📋</span>
+      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl text-amber-700 dark:text-amber-300 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
+            aria-hidden="true"><i class="fi fi-rr-clipboard-list"></i></span>
       <span class="font-semibold text-stone-800 dark:text-stone-200 group-hover:text-amber-700 dark:group-hover:text-amber-400">Agenda Mensual</span>
-      <span class="text-sm text-stone-500 dark:text-stone-400 text-center">Asignar por día de servicio</span>
+      <span class="text-sm text-stone-500 dark:text-stone-400 text-center">Ver los servicios del mes</span>
     </a>
     <!-- Canciones -->
     <a routerLink="/canciones"
        class="group flex flex-col items-center gap-2 p-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-600 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
-      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
-            aria-hidden="true">🎶</span>
+      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl text-amber-700 dark:text-amber-300 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
+            aria-hidden="true"><i class="fi fi-rr-list-music"></i></span>
       <span class="font-semibold text-stone-800 dark:text-stone-200 group-hover:text-amber-700 dark:group-hover:text-amber-400">Canciones</span>
       <span class="text-sm text-stone-500 dark:text-stone-400 text-center">Listado de canciones</span>
     </a>
     <!-- Calendario iglesia El Camino -->
     <a routerLink="/calendario"
        class="group flex flex-col items-center gap-2 p-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-600 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
-      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
-            aria-hidden="true">🗓️</span>
+      <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-2xl text-amber-700 dark:text-amber-300 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors"
+            aria-hidden="true"><i class="fi fi-rr-calendar-days"></i></span>
       <span class="font-semibold text-stone-800 dark:text-stone-200 group-hover:text-amber-700 dark:group-hover:text-amber-400">Calendario El Camino</span>
       <span class="text-sm text-stone-500 dark:text-stone-400 text-center">Días con servicio en la iglesia</span>
     </a>
   </div>
+</section>
+
+<!-- Próximos cumpleaños (30 días) -->
+<section class="mt-8 pt-8 border-t border-stone-200 dark:border-stone-700">
+  <h2 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">
+    Próximos cumpleaños (30 días)
+  </h2>
+  @if (loadingBirthdays()) {
+    <p class="text-sm text-stone-500 dark:text-stone-400 py-4">Cargando…</p>
+  } @else if (upcomingBirthdays().length === 0) {
+    <p class="text-sm text-stone-500 dark:text-stone-400 py-4">Ningún cumpleaños en los próximos 30 días.</p>
+  } @else {
+    <ul class="space-y-2">
+      @for (entry of upcomingBirthdays(); track entry.member.id) {
+        <li>
+          <a [routerLink]="['/miembros', entry.member.id]"
+             class="flex flex-wrap items-center justify-between gap-2 py-2.5 px-4 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 hover:border-amber-200 dark:hover:border-amber-600 hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-colors">
+            <span class="font-medium text-stone-800 dark:text-stone-200">{{ memberDisplay(entry.member) }}</span>
+            <span class="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
+              <span>{{ formatBirthdayDay(entry.nextDate) }}</span>
+              <span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200">
+                {{ formatDaysUntil(entry.daysUntil) }}
+              </span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
 </section>
 
 <!-- Resumen / valor -->

@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col" [class.gap-6]="!isModal" [class.gap-3]="isModal">
   @if (!isModal) {
     <div class="flex items-center justify-between">
       @if (!memberId) {
@@ -29,53 +29,62 @@
     }
 
     <form (ngSubmit)="submit()"
-          class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm space-y-5">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          class="rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm"
+          [class.p-6]="!isModal" [class.p-4]="isModal"
+          [class.space-y-5]="!isModal" [class.space-y-3]="isModal">
+      <div class="grid grid-cols-1 sm:grid-cols-2" [class.gap-5]="!isModal" [class.gap-3]="isModal">
         <div>
-          <label for="nombre" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Nombres <span class="text-red-500">*</span></label>
+          <label for="nombre" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Nombres <span class="text-red-500">*</span></label>
           <input id="nombre" type="text" [(ngModel)]="nombre" name="nombre" required
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
         </div>
         <div>
-          <label for="apellido" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Apellidos <span class="text-red-500">*</span></label>
+          <label for="apellido" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Apellidos <span class="text-red-500">*</span></label>
           <input id="apellido" type="text" [(ngModel)]="apellido" name="apellido" required
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2" [class.gap-5]="!isModal" [class.gap-3]="isModal">
         <div>
-          <label for="alias" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Alias</label>
+          <label for="alias" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Alias</label>
           <input id="alias" type="text" [(ngModel)]="alias" name="alias"
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
         </div>
         <div>
-          <label for="identificacion" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Identificación <span class="text-red-500">*</span></label>
+          <label for="identificacion" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Identificación <span class="text-red-500">*</span></label>
           <input id="identificacion" type="text" [(ngModel)]="identificacion" name="identificacion" required
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2" [class.gap-5]="!isModal" [class.gap-3]="isModal">
         <div>
-          <span class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Fecha de nacimiento <span class="text-red-500">*</span></span>
-          <div class="flex gap-2 mt-1">
+          <span class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Fecha de nacimiento <span class="text-red-500">*</span></span>
+          <div class="flex gap-2" [class.mt-1]="!isModal" [class.mt-0.5]="isModal">
             <select [(ngModel)]="birthDay" name="birthDay" required
-                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
               <option [ngValue]="null">Día</option>
               @for (d of birthDays; track d) {
                 <option [ngValue]="d">{{ d }}</option>
               }
             </select>
             <select [(ngModel)]="birthMonth" name="birthMonth" required
-                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
               <option [ngValue]="null">Mes</option>
               @for (m of birthMonths; track m.value) {
-                <option [ngValue]="m.value">{{ m.label }}</option>
+                <option [ngValue]="m.value">{{ isModal ? m.short : m.label }}</option>
               }
             </select>
             <select [(ngModel)]="birthYear" name="birthYear" required
-                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                    class="flex-1 min-w-0 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
               <option [ngValue]="null">Año</option>
               @for (y of birthYears; track y) {
                 <option [ngValue]="y">{{ y }}</option>
@@ -84,9 +93,10 @@
           </div>
         </div>
         <div>
-          <label for="sexo" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Sexo <span class="text-red-500">*</span></label>
+          <label for="sexo" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Sexo <span class="text-red-500">*</span></label>
           <select id="sexo" [(ngModel)]="sexoId" name="sexoId" required
-                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
             <option [ngValue]="null">Seleccione…</option>
             @for (s of sexos; track s.id) {
               <option [ngValue]="s.id">{{ s.descripcion }}</option>
@@ -95,31 +105,34 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2" [class.gap-5]="!isModal" [class.gap-3]="isModal">
         <div>
-          <label for="correo" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Correo</label>
+          <label for="correo" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Correo</label>
           <input id="correo" type="email" [(ngModel)]="correo" name="correo"
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
         </div>
         <div>
-          <label for="celular" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Celular</label>
+          <label for="celular" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Celular</label>
           <input id="celular" type="tel" [(ngModel)]="celular" name="celular"
-                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                 [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2" [class.gap-5]="!isModal" [class.gap-3]="isModal">
         <div>
-          <label for="rol" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Rol <span class="text-red-500">*</span></label>
+          <label for="rol" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Rol <span class="text-red-500">*</span></label>
           <select id="rol" [(ngModel)]="rolId" name="rolId" required
-                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
             <option [ngValue]="null">Seleccione…</option>
             @for (r of roles; track r.id) {
               <option [ngValue]="r.id">{{ r.nombre }}</option>
             }
           </select>
         </div>
-        <div class="flex items-end gap-3 pb-2.5">
+        <div class="flex items-end gap-3" [class.pb-2.5]="!isModal" [class.pb-0.5]="isModal">
           <label class="flex cursor-pointer items-center gap-2">
             <input type="checkbox" [(ngModel)]="activo" name="activo"
                    class="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-600 dark:bg-stone-700">
@@ -129,23 +142,26 @@
       </div>
 
       <div>
-        <label for="observaciones" class="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300">Observaciones</label>
-        <textarea id="observaciones" [(ngModel)]="observaciones" name="observaciones" rows="3"
-                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+        <label for="observaciones" class="block text-sm font-medium text-stone-700 dark:text-stone-300" [class.mb-1]="!isModal" [class.mb-0.5]="isModal">Observaciones</label>
+        <textarea id="observaciones" [(ngModel)]="observaciones" name="observaciones"
+                  [attr.rows]="isModal ? 2 : 3"
+                  class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   placeholder="Notas opcionales"></textarea>
       </div>
 
-      <div class="flex flex-wrap gap-3 pt-2">
+      <div class="flex flex-wrap gap-3" [class.pt-2]="!isModal" [class.pt-1]="isModal">
         <button type="submit"
                 [disabled]="saving"
-                class="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-800 disabled:opacity-50">
+                class="rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-800 disabled:opacity-50"
+                [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
           {{ saving ? 'Guardando…' : (memberId ? 'Guardar cambios' : 'Guardar miembro') }}
         </button>
         @if (isModal || memberId) {
           <button type="button"
                   (click)="cancelled.emit()"
                   [disabled]="saving"
-                  class="rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-600 transition-colors disabled:opacity-50">
+                  class="rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-600 transition-colors disabled:opacity-50"
+                  [class.py-2.5]="!isModal" [class.py-1.5]="isModal">
             Cancelar
           </button>
         } @else {

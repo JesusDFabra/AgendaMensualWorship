@@ -49,10 +49,10 @@ export class MemberFormComponent implements OnInit {
     return arr;
   })();
   readonly birthMonths = [
-    { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' }, { value: 3, label: 'Marzo' },
-    { value: 4, label: 'Abril' }, { value: 5, label: 'Mayo' }, { value: 6, label: 'Junio' },
-    { value: 7, label: 'Julio' }, { value: 8, label: 'Agosto' }, { value: 9, label: 'Septiembre' },
-    { value: 10, label: 'Octubre' }, { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
+    { value: 1, label: 'Enero', short: 'Ene' }, { value: 2, label: 'Febrero', short: 'Feb' }, { value: 3, label: 'Marzo', short: 'Mar' },
+    { value: 4, label: 'Abril', short: 'Abr' }, { value: 5, label: 'Mayo', short: 'May' }, { value: 6, label: 'Junio', short: 'Jun' },
+    { value: 7, label: 'Julio', short: 'Jul' }, { value: 8, label: 'Agosto', short: 'Ago' }, { value: 9, label: 'Septiembre', short: 'Sep' },
+    { value: 10, label: 'Octubre', short: 'Oct' }, { value: 11, label: 'Noviembre', short: 'Nov' }, { value: 12, label: 'Diciembre', short: 'Dic' },
   ];
   readonly birthDays = Array.from({ length: 31 }, (_, i) => i + 1);
 

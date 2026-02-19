@@ -8,6 +8,7 @@ import { MemberService, Member } from '../../../core/services/member.service';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
 import { AsignacionService, ServicioAsignado } from '../../../core/services/asignacion.service';
 import { NovedadService, Novedad } from '../../../core/services/novedad.service';
+import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { MemberFormComponent } from '../member-form/member-form.component';
 import { ServiceViewModalComponent } from '../../agenda/service-view-modal/service-view-modal.component';
 
@@ -25,10 +26,6 @@ export class MemberDetailComponent implements OnInit {
   loading = true;
   error: string | null = null;
   notFound = false;
-  updatingActivo = false;
-  showConfirmActivo = false;
-  confirmActivoDocumento = '';
-  confirmActivoError: string | null = null;
 
   showNovedadModal = false;
   novedadDocumento = '';
@@ -90,7 +87,8 @@ export class MemberDetailComponent implements OnInit {
     private memberService: MemberService,
     private servicioService: ServicioService,
     private asignacionService: AsignacionService,
-    private novedadService: NovedadService
+    private novedadService: NovedadService,
+    private adminAuth: AdminAuthService
   ) {}
 
   ngOnInit(): void {
@@ -121,7 +119,8 @@ export class MemberDetailComponent implements OnInit {
 
   private loadProximosServicios(miembroId: number): void {
     this.loadingProximosServicios = true;
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     this.asignacionService.getServiciosByMiembro(miembroId).subscribe({
       next: (list) => {
         this.proximosServicios = list.filter((s) => s.fecha >= today);
@@ -152,47 +151,11 @@ export class MemberDetailComponent implements OnInit {
     return isNaN(d.getTime()) ? value : d.toLocaleDateString('es');
   }
 
-  openConfirmActivo(): void {
-    this.showConfirmActivo = true;
-    this.confirmActivoDocumento = '';
-    this.confirmActivoError = null;
-  }
-
-  closeConfirmActivo(): void {
-    this.showConfirmActivo = false;
-    this.confirmActivoDocumento = '';
-    this.confirmActivoError = null;
-  }
-
-  confirmAndToggleActivo(): void {
-    if (!this.member) return;
-    const docIngresado = this.confirmActivoDocumento.trim();
-    const docCorrecto = String(this.member.identificacion ?? '').trim();
-    const esAdmin = docIngresado.toLowerCase() === 'admin';
-    if (!esAdmin && docIngresado !== docCorrecto) {
-      this.confirmActivoError = 'El número de documento no coincide.';
+  openNovedadModal(): void {
+    if (this.adminAuth.isAdmin()) {
+      this.loadAndShowNovedadCalendar();
       return;
     }
-    this.confirmActivoError = null;
-    this.updatingActivo = true;
-    const updated = { ...this.member, activo: !this.member.activo };
-    this.memberService.update(this.member.id, updated).subscribe({
-      next: (data) => {
-        this.member = data;
-        this.updatingActivo = false;
-        this.closeConfirmActivo();
-      },
-      error: () => {
-        this.updatingActivo = false;
-      },
-    });
-  }
-
-  onToggleActivoClick(): void {
-    this.openConfirmActivo();
-  }
-
-  openNovedadModal(): void {
     this.showNovedadModal = true;
     this.novedadDocumento = '';
     this.novedadDocError = null;
@@ -245,6 +208,12 @@ export class MemberDetailComponent implements OnInit {
       return;
     }
     this.novedadDocError = null;
+    this.showNovedadModal = false;
+    this.loadAndShowNovedadCalendar();
+  }
+
+  private loadAndShowNovedadCalendar(): void {
+    if (!this.member) return;
     this.loadingNovedades = true;
     const today = new Date().toISOString().slice(0, 10);
     const limit = new Date();
@@ -262,10 +231,9 @@ export class MemberDetailComponent implements OnInit {
         this.servicios = list;
         if (list.length > 0) {
           const [y, m] = list[0].fecha.split('-').map(Number);
-        this.novedadCalendarYear.set(y);
-        this.novedadCalendarMonth.set(m);
+          this.novedadCalendarYear.set(y);
+          this.novedadCalendarMonth.set(m);
         }
-        this.showNovedadModal = false;
         this.novedadCalendarVisible = true;
         this.loadingNovedades = false;
       },
@@ -351,12 +319,18 @@ export class MemberDetailComponent implements OnInit {
     this.showEditModal = true;
     this.editDocumento = '';
     this.editDocError = null;
+    this.editUnlocked = this.adminAuth.isAdmin();
   }
 
   closeEditModal(): void {
     this.showEditModal = false;
+    this.editUnlocked = false;
     this.editDocumento = '';
     this.editDocError = null;
+  }
+
+  onEditCancelled(): void {
+    this.closeEditModal();
   }
 
   confirmEditDocumento(): void {
@@ -369,7 +343,6 @@ export class MemberDetailComponent implements OnInit {
       return;
     }
     this.editDocError = null;
-    this.showEditModal = false;
     this.editUnlocked = true;
   }
 
@@ -379,6 +352,7 @@ export class MemberDetailComponent implements OnInit {
       next: (data) => {
         this.member = data;
         this.editUnlocked = false;
+        this.showEditModal = false;
       },
     });
   }
