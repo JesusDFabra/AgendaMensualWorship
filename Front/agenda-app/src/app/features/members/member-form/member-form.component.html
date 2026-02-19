@@ -3,8 +3,9 @@
     <div class="flex items-center justify-between">
       @if (!memberId) {
         <a routerLink="/miembros"
-           class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors order-first">
-          ← Volver al listado
+           class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors order-first">
+          <i class="fi fi-rr-list text-base" aria-hidden="true"></i>
+          <span>Volver al listado</span>
         </a>
       }
       <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">{{ memberId ? 'Editar miembro' : 'Agregar nuevo miembro' }}</h1>

@@ -1,8 +1,9 @@
 <div class="flex flex-col gap-4">
   <div class="flex justify-start">
     <a routerLink="/miembros"
-       class="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
-      ← Volver al listado
+       class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+      <i class="fi fi-rr-list text-base" aria-hidden="true"></i>
+      <span>Volver al listado</span>
     </a>
   </div>
 
@@ -13,8 +14,9 @@
   } @else if (notFound || !member) {
     <div class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-8 text-center text-stone-500 dark:text-stone-400">
       <p>No se encontró el miembro.</p>
-      <a routerLink="/miembros" class="mt-3 inline-block text-sm font-medium text-amber-600 dark:text-amber-400 hover:underline">
-        Volver al listado
+      <a routerLink="/miembros" class="mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+        <i class="fi fi-rr-list text-base" aria-hidden="true"></i>
+        <span>Volver al listado</span>
       </a>
     </div>
   } @else {

@@ -9,24 +9,24 @@
 
       <!-- Escritorio: enlaces en fila -->
       <div class="hidden md:flex items-center gap-3">
-        <a routerLink="/" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium" [routerLinkActiveOptions]="{ exact: true }"
-           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1">
-          Inicio
-        </a>
-        <a routerLink="/miembros" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
-           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1">
+        <a routerLink="/miembros" routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+           [routerLinkActiveOptions]="{ exact: false }"
+           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1 px-3 rounded-lg">
           Miembros
         </a>
-        <a routerLink="/agenda" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
-           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1">
+        <a routerLink="/agenda" routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+           [routerLinkActiveOptions]="{ exact: false }"
+           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1 px-3 rounded-lg">
           Agenda Mensual
         </a>
-        <a routerLink="/canciones" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
-           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1">
+        <a routerLink="/canciones" routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+           [routerLinkActiveOptions]="{ exact: false }"
+           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1 px-3 rounded-lg">
           Canciones
         </a>
-        <a routerLink="/calendario" routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
-           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1">
+        <a routerLink="/calendario" routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+           [routerLinkActiveOptions]="{ exact: false }"
+           class="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors py-1 px-3 rounded-lg">
           Calendario El Camino
         </a>
         @if (adminAuth.isAdmin()) {
@@ -55,9 +55,9 @@
                 [attr.aria-label]="theme.isDark() ? 'Activar modo claro' : 'Activar modo oscuro'"
                 class="rounded-lg p-1.5 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
           @if (theme.isDark()) {
-            <span class="text-base" aria-hidden="true">☀️</span>
+            <i class="fi fi-rr-sun text-lg" aria-hidden="true"></i>
           } @else {
-            <span class="text-base" aria-hidden="true">🌙</span>
+            <i class="fi fi-rr-moon text-lg" aria-hidden="true"></i>
           }
         </button>
       </div>
@@ -69,9 +69,9 @@
                 [attr.aria-label]="theme.isDark() ? 'Activar modo claro' : 'Activar modo oscuro'"
                 class="rounded-lg p-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
           @if (theme.isDark()) {
-            <span class="text-lg" aria-hidden="true">☀️</span>
+            <i class="fi fi-rr-sun text-xl" aria-hidden="true"></i>
           } @else {
-            <span class="text-lg" aria-hidden="true">🌙</span>
+            <i class="fi fi-rr-moon text-xl" aria-hidden="true"></i>
           }
         </button>
         <button type="button"
@@ -96,28 +96,27 @@
     @if (mobileMenuOpen()) {
       <div class="md:hidden border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800/95 backdrop-blur-sm">
         <div class="max-w-5xl mx-auto px-4 py-2 flex flex-col gap-0.5">
-          <a routerLink="/" (click)="closeMobileMenu()"
-             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium" [routerLinkActiveOptions]="{ exact: true }"
-             class="py-2 px-3 rounded-lg text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
-            Inicio
-          </a>
           <a routerLink="/miembros" (click)="closeMobileMenu()"
-             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+             [routerLinkActiveOptions]="{ exact: false }"
              class="py-2 px-3 rounded-lg text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
             Miembros
           </a>
           <a routerLink="/agenda" (click)="closeMobileMenu()"
-             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+             [routerLinkActiveOptions]="{ exact: false }"
              class="py-2 px-3 rounded-lg text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
             Agenda Mensual
           </a>
           <a routerLink="/canciones" (click)="closeMobileMenu()"
-             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+             [routerLinkActiveOptions]="{ exact: false }"
              class="py-2 px-3 rounded-lg text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
             Canciones
           </a>
           <a routerLink="/calendario" (click)="closeMobileMenu()"
-             routerLinkActive="text-amber-600 dark:text-amber-400 font-medium"
+             routerLinkActive="!text-amber-700 !dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30"
+             [routerLinkActiveOptions]="{ exact: false }"
              class="py-2 px-3 rounded-lg text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
             Calendario El Camino
           </a>
