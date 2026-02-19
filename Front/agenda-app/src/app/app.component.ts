@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
@@ -18,6 +18,13 @@ export class AppComponent implements OnInit {
   adminError = signal(false);
   /** Menú móvil abierto (hamburguesa). */
   mobileMenuOpen = signal(false);
+  /** Mostrar botón "ir arriba" cuando el usuario ha hecho scroll hacia abajo. */
+  showBackToTop = signal(false);
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.showBackToTop.set(typeof window !== 'undefined' && window.scrollY > 400);
+  }
 
   constructor(
     public theme: ThemeService,
@@ -61,5 +68,11 @@ export class AppComponent implements OnInit {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  scrollToTop(): void {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

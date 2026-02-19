@@ -146,6 +146,17 @@
     <router-outlet />
   </main>
 
+  <!-- Botón ir arriba -->
+  @if (showBackToTop()) {
+    <button type="button"
+            (click)="scrollToTop()"
+            aria-label="Volver arriba"
+            title="Volver arriba"
+            class="fixed bottom-6 right-6 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 shadow-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 dark:hover:bg-amber-900/30 dark:hover:border-amber-600 dark:hover:text-amber-300 transition-colors">
+      <i class="fi fi-rr-angle-up text-xl" aria-hidden="true"></i>
+    </button>
+  }
+
   <!-- Modal acceso administrador -->
   @if (showAdminModal()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
