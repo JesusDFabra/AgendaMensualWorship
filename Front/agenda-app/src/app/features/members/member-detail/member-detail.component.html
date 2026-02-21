@@ -22,103 +22,95 @@
                      (saved)="onMemberSaved()"
                      (cancelled)="editUnlocked = false"></app-member-form>
   } @else {
-    <!-- Cabecera: nombre de la persona -->
-    <header class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400 flex flex-wrap items-start justify-between gap-4">
+    <!-- Contenedor: perfil a la izquierda, Próximos servicios a la derecha en pantallas grandes -->
+    <div class="grid grid-cols-1 md:grid-cols-[35%_1fr] gap-4 md:gap-6 md:items-start">
+      <!-- Columna izquierda: cabecera y datos en una sola sección -->
       <div class="min-w-0">
-        <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
-          {{ member.nombre }} {{ member.apellido }}
-        </h1>
-        @if (member.alias) {
-          <p class="mt-1 text-lg text-stone-600 dark:text-stone-300 font-medium">«{{ member.alias }}»</p>
-        }
-        <div class="mt-3 flex items-center gap-2">
-          <span [ngClass]="{
-            'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium': true,
-            'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': member.activo,
-            'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400': !member.activo
-          }">
-            {{ member.activo ? 'Activo' : 'Inactivo' }}
-          </span>
-          @if (member.rol?.nombre) {
-            <span class="text-sm text-stone-500 dark:text-stone-400">· {{ member.rol?.nombre }}</span>
-          }
-        </div>
-      </div>
-      @if (!editUnlocked) {
-        <button type="button"
-                (click)="openEditModal()"
-                class="shrink-0 rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
-          Editar
-        </button>
-      }
-    </header>
-
-    <!-- Datos básicos -->
-    <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
-      <h2 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-2">Datos de la persona</h2>
-      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Nombre completo</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.nombre }} {{ member.apellido }}</dd>
-        </div>
-        @if (member.alias) {
-          <div>
-            <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Alias</dt>
-            <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.alias }}</dd>
-          </div>
-        }
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Fecha de nacimiento</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ formatDate(member.fecNacimiento) }}</dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Sexo</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.sexo?.descripcion ?? '—' }}</dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Rol</dt>
-          <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.rol?.nombre ?? '—' }}</dd>
-        </div>
-        @if (member.correo) {
-          <div class="sm:col-span-3">
-            <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Correo</dt>
-            <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.correo }}</dd>
-          </div>
-        }
-        @if (member.celular) {
-          <div>
-            <dt class="text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">Celular</dt>
-            <dd class="mt-0.5 text-lg font-medium text-stone-900 dark:text-stone-100">{{ member.celular }}</dd>
-          </div>
-        }
-      </dl>
-    </section>
-
-    <!-- Próximos servicios en los que está asignado -->
-    <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
-      <h2 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">Próximos servicios</h2>
-      @if (loadingProximosServicios) {
-        <p class="text-sm text-stone-500 dark:text-stone-400">Cargando…</p>
-      } @else if (proximosServicios.length === 0) {
-        <p class="text-sm text-stone-500 dark:text-stone-400">No tiene servicios asignados a partir de hoy.</p>
-      } @else {
-        <ul class="space-y-2">
-          @for (s of proximosServicios; track s.servicioId) {
-            <li>
-              <button type="button"
-                      (click)="openServiceView(s.servicioId)"
-                      class="w-full flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-700/30 px-3 py-2 text-sm font-medium text-stone-800 dark:text-stone-200 hover:bg-amber-50 hover:border-amber-200 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors text-left">
-                <span>{{ formatDateLong(s.fecha) }}</span>
-                @if (s.rolNombre) {
-                  <span class="text-stone-500 dark:text-stone-400">· {{ s.rolNombre }}</span>
+        <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400">
+          <!-- Cabecera: nombre, alias, estado, rol -->
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="min-w-0">
+              <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
+                {{ member.nombre }} {{ member.apellido }}
+              </h1>
+              @if (member.alias) {
+                <p class="mt-1 text-lg text-stone-600 dark:text-stone-300 font-medium">«{{ member.alias }}»</p>
+              }
+              <div class="mt-3 flex items-center gap-2">
+                <span [ngClass]="{
+                  'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium': true,
+                  'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': member.activo,
+                  'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400': !member.activo
+                }">
+                  {{ member.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+                @if (member.rol?.nombre) {
+                  <span class="text-sm text-stone-500 dark:text-stone-400">· {{ member.rol?.nombre }}</span>
                 }
-                <span class="ml-auto text-amber-600 dark:text-amber-400 text-xs">Ver servicio →</span>
+              </div>
+            </div>
+            @if (!editUnlocked) {
+              <button type="button"
+                      (click)="openEditModal()"
+                      class="shrink-0 rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
+                Editar
               </button>
-            </li>
-          }
-        </ul>
-      }
-    </section>
+            }
+          </div>
+
+          <!-- Datos de la persona (solo icono + valores, sin etiquetas; énfasis bajo) -->
+          <div class="mt-6">
+            <ul class="flex flex-col gap-2 text-sm text-stone-600 dark:text-stone-400">
+              <li class="flex items-center gap-2">
+                <i class="fi fi-rr-calendar text-stone-400 dark:text-stone-500 shrink-0" aria-hidden="true"></i>
+                <span>{{ formatDate(member.fecNacimiento) }}</span>
+              </li>
+              @if (member.correo) {
+                <li class="flex items-center gap-2">
+                  <i class="fi fi-rr-envelope text-stone-400 dark:text-stone-500 shrink-0" aria-hidden="true"></i>
+                  <a [href]="'mailto:' + member.correo" class="break-all hover:text-amber-600 dark:hover:text-amber-400">{{ member.correo }}</a>
+                </li>
+              }
+              @if (member.celular) {
+                <li class="flex items-center gap-2">
+                  <i class="fi fi-rr-phone-call text-stone-400 dark:text-stone-500 shrink-0" aria-hidden="true"></i>
+                  <a [href]="'tel:' + member.celular" class="hover:text-amber-600 dark:hover:text-amber-400">{{ member.celular }}</a>
+                </li>
+              }
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <!-- Columna derecha: Próximos servicios (solo en lg a la derecha) -->
+      <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm lg:sticky lg:top-4">
+        <h2 class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">
+          <i class="fi fi-rr-clipboard-list text-base" aria-hidden="true"></i>
+          Próximos servicios
+        </h2>
+        @if (loadingProximosServicios) {
+          <p class="text-sm text-stone-500 dark:text-stone-400">Cargando…</p>
+        } @else if (proximosServicios.length === 0) {
+          <p class="text-sm text-stone-500 dark:text-stone-400">No tiene servicios asignados a partir de hoy.</p>
+        } @else {
+          <ul class="space-y-2">
+            @for (s of proximosServicios; track s.servicioId) {
+              <li>
+                <button type="button"
+                        (click)="openServiceView(s.servicioId)"
+                        class="w-full flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-700/30 px-3 py-2 text-sm font-medium text-stone-800 dark:text-stone-200 hover:bg-amber-50 hover:border-amber-200 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors text-left">
+                  <span>{{ formatDateLong(s.fecha) }}</span>
+                  @if (s.rolNombre) {
+                    <span class="text-stone-500 dark:text-stone-400">· {{ s.rolNombre }}</span>
+                  }
+                  <span class="ml-auto text-amber-600 dark:text-amber-400 text-xs">Ver servicio →</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
 
     <!-- Modal ver detalle del servicio (solo lectura) -->
     @if (selectedServicioIdForView !== null) {
