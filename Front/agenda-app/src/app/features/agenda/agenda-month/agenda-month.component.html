@@ -20,21 +20,20 @@
     </div>
   } @else {
     <div class="flex flex-col gap-4">
-      <div class="flex items-center justify-between gap-2">
+      <div class="sticky z-[9] px-4 py-3 flex items-center justify-between gap-2 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm mt-1"
+     style="top: 3.25rem;">
         <button type="button"
                 (click)="prevMonth()"
                 aria-label="Mes anterior"
-                class="flex items-center gap-2 rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 px-4 py-2.5 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors shadow-sm">
-          <i class="fi fi-rr-angle-left text-lg" aria-hidden="true"></i>
-          <span>Mes anterior</span>
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors shadow-sm">
+          <i class="fi fi-rr-angle-left text-xl" aria-hidden="true"></i>
         </button>
         <h2 class="text-lg font-semibold text-stone-800 dark:text-stone-100 shrink-0">{{ monthLabel() }}</h2>
         <button type="button"
                 (click)="nextMonth()"
                 aria-label="Mes siguiente"
-                class="flex items-center gap-2 rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 px-4 py-2.5 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors shadow-sm">
-          <span>Mes siguiente</span>
-          <i class="fi fi-rr-angle-right text-lg" aria-hidden="true"></i>
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 dark:hover:border-amber-600 transition-colors shadow-sm">
+          <i class="fi fi-rr-angle-right text-xl" aria-hidden="true"></i>
         </button>
       </div>
 
@@ -62,26 +61,26 @@
                 }
               </div>
               <div class="p-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div>
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 text-sm min-w-0">
+                  <div class="min-w-0">
                     <dl class="space-y-1.5">
                       @for (slot of day.slots.slice(0, 5); track slot.label) {
-                        <div class="flex gap-2">
-                          <dt class="font-medium text-stone-500 dark:text-stone-400 min-w-[4.5rem]">{{ slot.label }}:</dt>
-                          <dd class="text-stone-800 dark:text-stone-200 truncate min-w-0"
-                              [ngClass]="slot.nombre ? 'cursor-help border-b border-dotted border-stone-400 dark:border-stone-500 w-fit' : ''"
+                        <div class="flex min-w-0">
+                          <dt class="font-medium text-stone-500 dark:text-stone-400 w-[5.5rem] shrink-0 text-sm">{{ slot.label }}:</dt>
+                          <dd class="text-stone-800 dark:text-stone-200 truncate min-w-0 pl-1"
+                              [ngClass]="slot.nombre ? 'cursor-help border-b border-dotted border-stone-400 dark:border-stone-500' : ''"
                               [attr.title]="slot.nombreCompleto">{{ slot.nombre ?? '—' }}</dd>
                         </div>
                       }
                     </dl>
                   </div>
-                  <div>
+                  <div class="min-w-0">
                     <dl class="space-y-1.5">
                       @for (slot of day.slots.slice(5); track slot.label) {
-                        <div class="flex gap-2">
-                          <dt class="font-medium text-stone-500 dark:text-stone-400 min-w-[4.5rem]">{{ slot.label }}:</dt>
-                          <dd class="text-stone-800 dark:text-stone-200 truncate min-w-0"
-                              [ngClass]="slot.nombre ? 'cursor-help border-b border-dotted border-stone-400 dark:border-stone-500 w-fit' : ''"
+                        <div class="flex min-w-0">
+                          <dt class="font-medium text-stone-500 dark:text-stone-400 w-[5.5rem] shrink-0 text-sm">{{ slot.label }}:</dt>
+                          <dd class="text-stone-800 dark:text-stone-200 truncate min-w-0 pl-1"
+                              [ngClass]="slot.nombre ? 'cursor-help border-b border-dotted border-stone-400 dark:border-stone-500' : ''"
                               [attr.title]="slot.nombreCompleto">{{ slot.nombre ?? '—' }}</dd>
                         </div>
                       }

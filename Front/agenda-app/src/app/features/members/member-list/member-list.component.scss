@@ -1,0 +1,9 @@
+// Contraste del desplegable "Ordenar por" en modo oscuro.
+// Las opciones del <select> nativo se pintan con estilos del sistema;
+// forzamos fondo y color para que se lean bien.
+:host-context(.dark) #sort-members {
+  option {
+    background-color: #292524; // stone-800
+    color: #e7e5e4; // stone-200
+  }
+}
