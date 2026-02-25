@@ -26,7 +26,8 @@
     <div class="grid grid-cols-1 md:grid-cols-[35%_1fr] gap-4 md:gap-6 md:items-start">
       <!-- Columna izquierda: cabecera y datos en una sola sección -->
       <div class="min-w-0">
-        <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4 border-l-amber-500 dark:border-l-amber-400">
+        <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-sm border-l-4"
+                [ngClass]="member.activo ? 'border-l-amber-500 dark:border-l-amber-400' : 'border-l-stone-400 dark:border-l-stone-500'">
           <!-- Cabecera: nombre, alias, estado, rol -->
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0">
