@@ -3,6 +3,8 @@ package com.elCamino.Worship.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -77,8 +79,13 @@ public class MemberController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return ResponseEntity.noContent().build(); // 204 No Content
+            try {
+                repository.deleteById(id);
+                return ResponseEntity.noContent().build(); // 204 No Content
+            } catch (DataIntegrityViolationException ex) {
+                // Si hay relaciones (asignaciones/servicios/novedades) el borrado puede fallar por FK.
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
         } else {
             return ResponseEntity.notFound().build(); // 404 Not Found
         }

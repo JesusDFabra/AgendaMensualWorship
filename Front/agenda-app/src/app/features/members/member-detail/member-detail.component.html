@@ -17,10 +17,6 @@
         Volver al listado
       </a>
     </div>
-  } @else if (editUnlocked) {
-    <app-member-form [memberId]="member.id"
-                     (saved)="onMemberSaved()"
-                     (cancelled)="editUnlocked = false"></app-member-form>
   } @else {
     <!-- Contenedor: perfil a la izquierda, Próximos servicios a la derecha en pantallas grandes -->
     <div class="grid grid-cols-1 md:grid-cols-[35%_1fr] gap-4 md:gap-6 md:items-start">
@@ -50,13 +46,22 @@
                 }
               </div>
             </div>
-            @if (!editUnlocked) {
-              <button type="button"
-                      (click)="openEditModal()"
-                      class="shrink-0 rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
-                Editar
-              </button>
-            }
+            <div class="shrink-0 flex flex-wrap items-center gap-2">
+              @if (!editUnlocked) {
+                <button type="button"
+                        (click)="openEditModal()"
+                        class="rounded-lg border border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-stone-700 px-4 py-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-600 transition-colors">
+                  Editar
+                </button>
+              }
+              @if (adminAuth.isAdmin()) {
+                <button type="button"
+                        (click)="openDeleteModal()"
+                        class="rounded-lg border border-red-500/70 dark:border-red-400/70 bg-red-50 text-red-800 dark:bg-stone-700 dark:text-red-200 px-4 py-2 text-sm font-medium hover:bg-red-100 dark:hover:bg-stone-600 transition-colors">
+                  Eliminar
+                </button>
+              }
+            </div>
           </div>
 
           <!-- Datos de la persona (solo icono + valores, sin etiquetas; énfasis bajo) -->
@@ -159,6 +164,79 @@
       </div>
     }
 
+    <!-- Modal formulario de edición del miembro -->
+    @if (editUnlocked && member) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="edit-form-modal-title">
+        <div class="fixed inset-0 bg-black/50" (click)="editUnlocked = false"></div>
+        <div class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 shadow-xl">
+          <div class="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 px-6 py-4">
+            <h2 id="edit-form-modal-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100">Editar «{{ member.nombre }} {{ member.apellido }}»</h2>
+            <button type="button"
+                    (click)="editUnlocked = false"
+                    class="rounded-lg p-2 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+                    aria-label="Cerrar">
+              <span class="text-xl leading-none">×</span>
+            </button>
+          </div>
+          <div class="p-6">
+            <app-member-form [memberId]="member.id"
+                             [isModal]="true"
+                             (saved)="onMemberSaved()"
+                             (cancelled)="editUnlocked = false"></app-member-form>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Modal eliminar miembro (solo admin) -->
+    @if (showDeleteModal && member && adminAuth.isAdmin()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="delete-modal-title">
+        <div class="fixed inset-0 bg-black/50" (click)="closeDeleteModal()"></div>
+        <div class="relative z-10 w-full max-w-md rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
+          <h3 id="delete-modal-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">
+            Eliminar «{{ member.nombre }} {{ member.apellido }}»
+          </h3>
+          <p class="text-sm text-stone-600 dark:text-stone-400 mb-4">
+            Esta acción es permanente. Para confirmar, escribe <span class="font-semibold text-red-700 dark:text-red-300">ELIMINAR</span> en mayúsculas.
+          </p>
+
+          <label for="delete-confirm" class="sr-only">Confirmación</label>
+          <input id="delete-confirm"
+                 type="text"
+                 autocomplete="off"
+                 [(ngModel)]="deleteConfirmText"
+                 name="deleteConfirmText"
+                 placeholder="ELIMINAR"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 mb-3">
+
+          @if (deleteError) {
+            <p class="text-sm text-red-600 dark:text-red-400 mb-3">{{ deleteError }}</p>
+          }
+
+          <div class="flex gap-3 justify-end">
+            <button type="button"
+                    (click)="closeDeleteModal()"
+                    [disabled]="deletingMember"
+                    class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:pointer-events-none disabled:opacity-50">
+              Cancelar
+            </button>
+            <button type="button"
+                    (click)="confirmDeleteMember()"
+                    [disabled]="deletingMember || deleteConfirmText.trim() !== 'ELIMINAR'"
+                    class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:pointer-events-none disabled:opacity-50">
+              {{ deletingMember ? 'Eliminando…' : 'Eliminar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- Novedades: días en que no puede estar -->
     <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50 p-6">
       <h2 class="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">Novedades y disponibilidad</h2>
@@ -175,7 +253,8 @@
         <div class="flex items-center justify-between mb-3">
           <p class="text-base text-stone-600 dark:text-stone-400">
             <span class="inline-block w-3 h-3 rounded bg-green-500 align-middle mr-1"></span> Disponible &nbsp;
-            <span class="inline-block w-3 h-3 rounded bg-stone-400 dark:bg-stone-500 align-middle mr-1"></span> No disponible. Clic en un día para cambiar.
+            <span class="inline-block w-3 h-3 rounded bg-stone-400 dark:bg-stone-500 align-middle mr-1"></span> No disponible &nbsp;
+            <span class="inline-block w-3 h-3 rounded bg-amber-500 align-middle mr-1"></span> Ya asignado (no se puede marcar novedad).
           </p>
           <button type="button"
                   (click)="closeNovedadCalendar()"
@@ -183,6 +262,9 @@
             Ocultar calendario
           </button>
         </div>
+        @if (novedadError) {
+          <p class="text-sm text-red-600 dark:text-red-400 mb-3">{{ novedadError }}</p>
+        }
         @if (loadingNovedades) {
           <p class="text-base text-stone-500 dark:text-stone-400 py-4 mt-4">Cargando días con servicio…</p>
         } @else if (servicios.length === 0) {
@@ -210,17 +292,33 @@
           <div class="grid grid-cols-7 gap-1">
             @for (cell of novedadCalendarGrid(); track (cell.dateStr ?? 'e' + $index)) {
               @if (cell.servicio) {
-                <button type="button"
-                        (click)="toggleNovedad(cell.servicio)"
-                        [disabled]="updatingNovedadServicioId === cell.servicio.id"
-                        [attr.aria-pressed]="hasNovedadForServicio(cell.servicio.id)"
-                        [attr.title]="hasNovedadForServicio(cell.servicio.id) ? 'Clic para quitar novedad' : 'Clic para marcar no disponible'"
-                        class="aspect-[2/1] min-w-0 rounded-lg text-base font-medium transition-colors disabled:opacity-50
-                              {{ hasNovedadForServicio(cell.servicio.id)
-                                 ? 'bg-stone-400 dark:bg-stone-500 text-white hover:bg-stone-500 dark:hover:bg-stone-600'
-                                 : 'bg-green-500 dark:bg-green-500 text-white hover:bg-green-600 dark:hover:bg-green-600' }}">
-                  {{ cell.day }}
-                </button>
+                @if (isAssignedToServicio(cell.servicio.id)) {
+                  <div class="aspect-[2/1] min-w-0 rounded-lg text-base font-medium flex items-center justify-center bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 cursor-not-allowed"
+                       title="Ya estás asignado a este servicio; no puedes marcar novedad">
+                    {{ cell.day }}
+                  </div>
+                } @else {
+                  <button type="button"
+                          (click)="toggleNovedad(cell.servicio)"
+                          [disabled]="updatingNovedadServicioId === cell.servicio.id"
+                          [attr.aria-pressed]="hasNovedadForServicio(cell.servicio.id)"
+                          [attr.title]="hasNovedadForServicio(cell.servicio.id) ? 'Clic para quitar novedad' : 'Clic para marcar no disponible'"
+                          class="aspect-[2/1] min-w-0 rounded-lg text-base font-medium transition-colors disabled:opacity-50 relative
+                                {{ hasNovedadForServicio(cell.servicio.id)
+                                   ? 'bg-stone-400 dark:bg-stone-500 text-white hover:bg-stone-500 dark:hover:bg-stone-600'
+                                   : 'bg-green-500 dark:bg-green-500 text-white hover:bg-green-600 dark:hover:bg-green-600' }}">
+                    @if (updatingNovedadServicioId === cell.servicio.id) {
+                      <span class="absolute inset-0 flex flex-col items-center justify-center gap-0.5 rounded-lg bg-black/20 text-white">
+                        <svg class="animate-spin h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span class="text-[10px] font-medium">Guardando…</span>
+                      </span>
+                    }
+                    <span>{{ cell.day }}</span>
+                  </button>
+                }
               } @else if (cell.day !== null) {
                 <div class="aspect-[2/1] rounded-lg bg-stone-100/50 dark:bg-stone-800/30 text-stone-400 dark:text-stone-500 text-base flex items-center justify-center" aria-hidden="true">
                   {{ cell.day }}

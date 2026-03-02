@@ -3,6 +3,7 @@ package com.elCamino.Worship.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.elCamino.Worship.model.Availability;
 import com.elCamino.Worship.repository.AvailabilityRepository;
+import com.elCamino.Worship.repository.ServicioMiembroRepository;
 
 @RestController
 @RequestMapping("/api/novedades")
@@ -24,10 +26,12 @@ import com.elCamino.Worship.repository.AvailabilityRepository;
 public class AvailabilityController {
 
     private final AvailabilityRepository repository;
+    private final ServicioMiembroRepository servicioMiembroRepository;
 
     // Constructor manual
-    public AvailabilityController(AvailabilityRepository repository) {
+    public AvailabilityController(AvailabilityRepository repository, ServicioMiembroRepository servicioMiembroRepository) {
         this.repository = repository;
+        this.servicioMiembroRepository = servicioMiembroRepository;
     }
 
     @GetMapping
@@ -39,23 +43,46 @@ public class AvailabilityController {
     }
 
     @PostMapping
-    public ResponseEntity<List<Availability>> createMultipleAvailabilities(@RequestBody List<Availability> availabilities) {
+    public ResponseEntity<?> createMultipleAvailabilities(@RequestBody List<Availability> availabilities) {
         for (Availability availability : availabilities) {
+            // Si falta miembro o servicio, simplemente registramos la novedad (caso raro)
+            if (availability.getMiembro() != null && availability.getServicio() != null
+                    && availability.getMiembro().getId() != null && availability.getServicio().getId() != null) {
+                Long servicioId = availability.getServicio().getId();
+                Long miembroId = availability.getMiembro().getId();
+
+                // Regla: si el miembro ya está asignado a ese servicio, no puede marcar novedad
+                if (servicioMiembroRepository.existsByServicio_IdAndMiembro_Id(servicioId, miembroId)) {
+                    String message = "El miembro ya está asignado a este servicio y no puede marcar novedad para esa fecha.";
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+                }
+            }
+
             availability.setFechaRegistro(LocalDate.now());
         }
+
         List<Availability> saved = repository.saveAll(availabilities);
         return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Availability> updateAvailability(@PathVariable Long id, @RequestBody Availability updatedAvailability) {
+    public ResponseEntity<?> updateAvailability(@PathVariable Long id, @RequestBody Availability updatedAvailability) {
         return repository.findById(id)
                 .map(existing -> {
+                    if (updatedAvailability.getMiembro() != null && updatedAvailability.getServicio() != null
+                            && updatedAvailability.getMiembro().getId() != null && updatedAvailability.getServicio().getId() != null) {
+                        Long servicioId = updatedAvailability.getServicio().getId();
+                        Long miembroId = updatedAvailability.getMiembro().getId();
+                        if (servicioMiembroRepository.existsByServicio_IdAndMiembro_Id(servicioId, miembroId)) {
+                            String message = "El miembro ya está asignado a este servicio y no puede marcar novedad para esa fecha.";
+                            return ResponseEntity.<String>status(HttpStatus.CONFLICT).body(message);
+                        }
+                    }
                     existing.setMiembro(updatedAvailability.getMiembro());
                     existing.setServicio(updatedAvailability.getServicio());
                     existing.setObservacion(updatedAvailability.getObservacion());
                     Availability saved = repository.save(existing);
-                    return ResponseEntity.ok(saved);
+                    return ResponseEntity.<Availability>ok(saved);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

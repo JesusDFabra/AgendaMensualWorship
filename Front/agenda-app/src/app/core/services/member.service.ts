@@ -72,4 +72,8 @@ export class MemberService {
   update(id: number, member: Member): Observable<Member> {
     return this.http.put<Member>(`${this.baseUrl}/api/miembros/${id}`, member);
   }
+
+  deleteById(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/api/miembros/${id}`);
+  }
 }

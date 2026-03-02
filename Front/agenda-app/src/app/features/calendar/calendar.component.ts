@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ServicioService, Servicio } from '../../core/services/servicio.service';
 import { AdminAuthService } from '../../core/services/admin-auth.service';
 
@@ -8,7 +9,7 @@ type DayCell = { day: number | null; dateStr: string | null; servicio: Servicio 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
 })
@@ -18,6 +19,14 @@ export class CalendarComponent implements OnInit {
   services = signal<Servicio[]>([]);
   loading = signal(true);
   updating = signal<string | null>(null); // dateStr being toggled
+
+  /** Si está activo, al agregar un servicio se pedirá el nombre (fecha especial). */
+  fechaEspecial = false;
+  /** Modal para nombre de fecha especial: fecha pendiente y texto. */
+  showNombreModal = false;
+  pendingDateStr: string | null = null;
+  nombreServicio = '';
+  savingNombre = false;
 
   constructor(
     private servicioService: ServicioService,
@@ -117,8 +126,8 @@ export class CalendarComponent implements OnInit {
     if (cell.day === null || cell.dateStr === null) return;
     if (this.updating()) return;
 
-    this.updating.set(cell.dateStr);
     if (cell.servicio) {
+      this.updating.set(cell.dateStr);
       this.servicioService.deleteById(cell.servicio.id).subscribe({
         next: () => {
           this.services.update(list => list.filter(s => s.id !== cell.servicio!.id));
@@ -127,14 +136,45 @@ export class CalendarComponent implements OnInit {
         error: () => this.updating.set(null),
       });
     } else {
-      this.servicioService.create([{ fecha: cell.dateStr }]).subscribe({
-        next: (created) => {
-          this.services.update(list => [...list, ...created]);
-          this.updating.set(null);
-        },
-        error: () => this.updating.set(null),
-      });
+      if (this.fechaEspecial) {
+        this.pendingDateStr = cell.dateStr;
+        this.nombreServicio = '';
+        this.showNombreModal = true;
+      } else {
+        this.updating.set(cell.dateStr);
+        this.servicioService.create([{ fecha: cell.dateStr }]).subscribe({
+          next: (created) => {
+            this.services.update(list => [...list, ...created]);
+            this.updating.set(null);
+          },
+          error: () => this.updating.set(null),
+        });
+      }
     }
+  }
+
+  closeNombreModal(): void {
+    this.showNombreModal = false;
+    this.pendingDateStr = null;
+    this.nombreServicio = '';
+    this.savingNombre = false;
+  }
+
+  confirmNombreServicio(): void {
+    if (!this.pendingDateStr) return;
+    const nombre = this.nombreServicio.trim() || null;
+    if (this.fechaEspecial && !nombre) return; // en fecha especial exigir nombre
+    this.savingNombre = true;
+    this.servicioService.create([{ fecha: this.pendingDateStr, nombre: nombre ?? undefined }]).subscribe({
+      next: (created) => {
+        this.services.update(list => [...list, ...created]);
+        this.closeNombreModal();
+        this.savingNombre = false;
+      },
+      error: () => {
+        this.savingNombre = false;
+      },
+    });
   }
 
   isUpdating(dateStr: string | null): boolean {

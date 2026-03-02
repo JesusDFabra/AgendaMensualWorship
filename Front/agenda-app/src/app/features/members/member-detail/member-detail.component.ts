@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MemberService, Member } from '../../../core/services/member.service';
@@ -46,6 +46,11 @@ export class MemberDetailComponent implements OnInit {
   editDocError: string | null = null;
   editUnlocked = false;
 
+  showDeleteModal = false;
+  deleteConfirmText = '';
+  deleteError: string | null = null;
+  deletingMember = false;
+
   proximosServicios: ServicioAsignado[] = [];
   loadingProximosServicios = false;
   /** ID del servicio para abrir en modal de solo lectura (null = cerrado). */
@@ -88,7 +93,8 @@ export class MemberDetailComponent implements OnInit {
     private servicioService: ServicioService,
     private asignacionService: AsignacionService,
     private novedadService: NovedadService,
-    private adminAuth: AdminAuthService
+    public adminAuth: AdminAuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -214,6 +220,7 @@ export class MemberDetailComponent implements OnInit {
 
   private loadAndShowNovedadCalendar(): void {
     if (!this.member) return;
+    this.novedadError = null;
     this.loadingNovedades = true;
     const today = new Date().toISOString().slice(0, 10);
     const limit = new Date();
@@ -247,13 +254,27 @@ export class MemberDetailComponent implements OnInit {
     return this.novedades.some((n) => n.servicio?.id === servicioId);
   }
 
+  /** True si el miembro ya está asignado a este servicio (no puede marcar novedad). */
+  isAssignedToServicio(servicioId: number): boolean {
+    return this.proximosServicios.some((s) => s.servicioId === servicioId);
+  }
+
   getNovedadForServicio(servicioId: number): Novedad | undefined {
     return this.novedades.find((n) => n.servicio?.id === servicioId);
   }
 
+  novedadError: string | null = null;
+
   toggleNovedad(servicio: Servicio): void {
     if (!this.member) return;
     if (this.updatingNovedadServicioId !== null) return;
+    this.novedadError = null;
+
+    if (this.isAssignedToServicio(servicio.id)) {
+      this.novedadError = 'Ya estás asignado a este servicio; no puedes marcar novedad para esa fecha.';
+      return;
+    }
+
     const existing = this.getNovedadForServicio(servicio.id);
     if (existing) {
       this.updatingNovedadServicioId = servicio.id;
@@ -277,12 +298,16 @@ export class MemberDetailComponent implements OnInit {
           next: (created) => {
             if (created.length > 0) {
               this.novedades = [...this.novedades, created[0]];
-              // Modal motivo comentado por ahora: this.showMotivoForNovedad = created[0]; this.motivoTexto = '';
             }
             this.updatingNovedadServicioId = null;
           },
-          error: () => {
+          error: (err) => {
             this.updatingNovedadServicioId = null;
+            const msg =
+              typeof err?.error === 'string' && err.error.trim()
+                ? err.error
+                : 'No se pudo marcar la novedad.';
+            this.novedadError = msg;
           },
         });
     }
@@ -353,6 +378,47 @@ export class MemberDetailComponent implements OnInit {
         this.member = data;
         this.editUnlocked = false;
         this.showEditModal = false;
+      },
+    });
+  }
+
+  openDeleteModal(): void {
+    this.showDeleteModal = true;
+    this.deleteConfirmText = '';
+    this.deleteError = null;
+    this.deletingMember = false;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.deleteConfirmText = '';
+    this.deleteError = null;
+    this.deletingMember = false;
+  }
+
+  confirmDeleteMember(): void {
+    if (!this.member) return;
+    if (!this.adminAuth.isAdmin()) return;
+
+    if (this.deleteConfirmText.trim() !== 'ELIMINAR') {
+      this.deleteError = 'Debes escribir ELIMINAR en mayúsculas para continuar.';
+      return;
+    }
+
+    this.deleteError = null;
+    this.deletingMember = true;
+
+    this.memberService.deleteById(this.member.id).subscribe({
+      next: () => {
+        this.router.navigate(['/miembros']);
+      },
+      error: (err) => {
+        this.deletingMember = false;
+        const msg =
+          typeof err?.error === 'string' && err.error.trim()
+            ? err.error
+            : 'No se pudo eliminar el miembro.';
+        this.deleteError = msg;
       },
     });
   }

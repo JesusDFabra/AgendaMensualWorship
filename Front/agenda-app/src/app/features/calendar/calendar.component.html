@@ -23,6 +23,21 @@
       <p>Cargando calendario…</p>
     </div>
   } @else {
+    @if (adminAuth.isAdmin()) {
+      <div class="sticky top-14 z-10 rounded-lg border border-amber-200 dark:border-amber-700/50 bg-amber-50/50 dark:bg-amber-900/20 px-3 py-2 mb-3 shadow-sm flex flex-wrap items-center gap-2 backdrop-blur-sm">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox"
+                 [(ngModel)]="fechaEspecial"
+                 name="fechaEspecial"
+                 class="h-4 w-4 rounded border-2 border-amber-500 dark:border-amber-400 bg-white dark:bg-stone-800 text-amber-600 focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 cursor-pointer">
+          <span class="text-sm font-semibold text-stone-800 dark:text-stone-100">Fecha especial</span>
+        </label>
+        <span class="text-xs text-stone-600 dark:text-stone-400">
+          Clic en un día → se pedirá el nombre del servicio.
+        </span>
+      </div>
+    }
+
     <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-4 shadow-sm">
       <div class="grid grid-cols-3 items-center gap-4 mb-4">
         <div class="flex justify-start">
@@ -58,27 +73,69 @@
                     [disabled]="!adminAuth.isAdmin() || isUpdating(cell.dateStr)"
                     [attr.aria-pressed]="!!cell.servicio"
                     [attr.aria-label]="cell.servicio ? 'Quitar servicio el día ' + cell.day : 'Agregar servicio el día ' + cell.day"
-                    class="aspect-[2/1] rounded-lg text-sm font-medium transition-all min-w-0 flex items-center justify-center
+                    class="aspect-[2/1] rounded-lg text-sm font-medium transition-all min-w-0 flex flex-col items-center justify-center gap-0.5 px-1 relative
                            disabled:opacity-50 disabled:cursor-not-allowed
                            focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900
                            {{ cell.servicio
                               ? 'bg-amber-500 dark:bg-amber-500 text-white hover:bg-amber-600 dark:hover:bg-amber-600 shadow-sm'
                               : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' }}">
-              {{ cell.day }}
               @if (isUpdating(cell.dateStr)) {
-                <span class="sr-only">Guardando…</span>
+                <span class="absolute inset-0 flex flex-col items-center justify-center gap-0.5 rounded-lg bg-black/20 dark:bg-black/30 text-inherit">
+                  <svg class="animate-spin h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  <span class="text-[10px] font-medium">Guardando…</span>
+                </span>
+              }
+              <span>{{ cell.day }}</span>
+              @if (cell.servicio?.nombre && !isUpdating(cell.dateStr)) {
+                <span class="text-[10px] leading-tight truncate max-w-full" [attr.title]="cell.servicio?.nombre">{{ cell.servicio?.nombre }}</span>
               }
             </button>
           }
         }
       </div>
 
-      <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
-        Días en naranja = hay servicio en la iglesia El Camino.
-        @if (adminAuth.isAdmin()) {
-          Clic en un día para activar o desactivar.
-        }
-      </p>
+    
     </section>
+
+    <!-- Modal nombre de servicio (fecha especial) -->
+    @if (showNombreModal && pendingDateStr) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="nombre-servicio-modal-title">
+        <div class="fixed inset-0 bg-black/50" (click)="closeNombreModal()"></div>
+        <div class="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 p-6 shadow-xl">
+          <h3 id="nombre-servicio-modal-title" class="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">Fecha especial</h3>
+          <p class="text-sm text-stone-600 dark:text-stone-400 mb-4">
+            Indica el nombre del servicio para el día <strong>{{ pendingDateStr }}</strong> (ej. Culto especial, Vigilia, etc.).
+          </p>
+          <label for="nombre-servicio-input" class="sr-only">Nombre del servicio</label>
+          <input id="nombre-servicio-input"
+                 type="text"
+                 [(ngModel)]="nombreServicio"
+                 name="nombreServicio"
+                 placeholder="Ej. Culto especial"
+                 class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-4 py-2.5 text-stone-800 dark:text-stone-200 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-4"
+                 (keydown.enter)="confirmNombreServicio()">
+          <div class="flex gap-3 justify-end">
+            <button type="button"
+                    (click)="closeNombreModal()"
+                    [disabled]="savingNombre"
+                    class="rounded-lg border border-stone-200 dark:border-stone-600 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:opacity-50">
+              Cancelar
+            </button>
+            <button type="button"
+                    (click)="confirmNombreServicio()"
+                    [disabled]="savingNombre || !nombreServicio.trim()"
+                    class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50 disabled:pointer-events-none">
+              {{ savingNombre ? 'Guardando…' : 'Crear servicio' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>
