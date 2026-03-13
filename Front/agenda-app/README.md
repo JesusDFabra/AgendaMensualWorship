@@ -46,10 +46,11 @@ El mismo código puede generarse en dos “versiones”:
 | Versión | Uso | Comando | Salida |
 |--------|-----|---------|--------|
 | **Agenda Worship** (general) | Cualquier iglesia/equipo | `ng build` o `npm run build` | `dist/agenda-app/` |
-| **El Camino Worship** | Iglesia El Camino – ministerio de alabanza | `npm run build:elcamino` | `dist/elcamino-worship-app/` |
+| **Agenda Worship** (Iglesia El Camino) | Equipo de alabanza de la Iglesia El Camino | `npm run build:elcamino` | `dist/elcamino-worship-app/` |
 
-- La versión **general** muestra el nombre “Agenda Worship” y textos genéricos.
-- La versión **El Camino** muestra “El Camino Worship”, el tagline “Ministerio de alabanza - Iglesia El Camino” y descripciones adaptadas.
+- En ambas versiones el nombre de la app es **“Agenda Worship”**.
+- La versión **general** usa textos genéricos.
+- La versión **El Camino** usa el tagline “Ministerio de alabanza - Iglesia El Camino” y descripciones que mencionan la Iglesia El Camino (sin usar la marca “El Camino Worship”).
 
 Ambas usan la misma API y funcionalidad; solo cambia el branding (nombre, tagline, textos del hero). Para desplegar en Vercel puedes crear dos proyectos: uno con build `npm run build` y otro con `npm run build:elcamino`, apuntando cada uno a su carpeta de salida (`dist/agenda-app` y `dist/elcamino-worship-app`).
 
