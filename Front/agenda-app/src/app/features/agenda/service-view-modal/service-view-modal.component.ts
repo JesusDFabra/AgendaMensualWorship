@@ -1,10 +1,12 @@
 import { Component, EventEmitter, Input, OnChanges, Output, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
 import { AsignacionService, Asignacion } from '../../../core/services/asignacion.service';
 import { ServicioCancionService, ServicioCancion } from '../../../core/services/servicio-cancion.service';
 import { AGENDA_SLOTS, SLOT_COLORS } from '../agenda-slots';
+import { DevocionalService, DevocionalDto } from '../../../core/services/devocional.service';
 
 type SlotState = {
   label: string;
@@ -27,6 +29,7 @@ export class ServiceViewModalComponent implements OnChanges {
   servicio = signal<Servicio | null>(null);
   asignaciones = signal<Asignacion[]>([]);
   canciones = signal<ServicioCancion[]>([]);
+  devocional = signal<DevocionalDto | null>(null);
   loading = signal(true);
   notFound = signal(false);
 
@@ -54,6 +57,7 @@ export class ServiceViewModalComponent implements OnChanges {
     private servicioService: ServicioService,
     private asignacionService: AsignacionService,
     private servicioCancionService: ServicioCancionService,
+    private devocionalService: DevocionalService,
   ) {}
 
   ngOnChanges(): void {
@@ -65,11 +69,22 @@ export class ServiceViewModalComponent implements OnChanges {
       servicio: this.servicioService.getById(id),
       asignaciones: this.asignacionService.getAsignaciones(id),
       canciones: this.servicioCancionService.getByServicio(id),
+      devocional: this.devocionalService.getByServicio(id).pipe(
+        catchError(() =>
+          of<DevocionalDto>({
+            servicioId: id,
+            miembroId: null,
+            miembroAlias: null,
+            miembroNombreCompleto: null,
+          }),
+        ),
+      ),
     }).subscribe({
-      next: ({ servicio, asignaciones, canciones }) => {
+      next: ({ servicio, asignaciones, canciones, devocional }) => {
         this.servicio.set(servicio);
         this.asignaciones.set(asignaciones);
         this.canciones.set(canciones);
+        this.devocional.set(devocional);
         this.loading.set(false);
       },
       error: () => {
@@ -99,5 +114,11 @@ export class ServiceViewModalComponent implements OnChanges {
     if (a) return a;
     if (b) return b;
     return '—';
+  }
+
+  devocionalDisplay(): string {
+    const d = this.devocional();
+    if (!d || d.miembroId == null) return '—';
+    return d.miembroAlias?.trim() || d.miembroNombreCompleto?.trim() || '—';
   }
 }

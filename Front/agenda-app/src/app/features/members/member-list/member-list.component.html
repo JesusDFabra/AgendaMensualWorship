@@ -111,7 +111,7 @@
                   <td class="px-4 py-3">
                     <span class="font-medium text-stone-800 dark:text-stone-200">{{ m.nombre }} {{ m.apellido }}</span>
                   </td>
-                  <td class="px-4 py-3 text-stone-600 dark:text-stone-400">{{ m.alias ?? '—' }}</td>
+                  <td class="px-4 py-3 text-stone-600 dark:text-stone-400">{{ m.alias?.trim() ? m.alias : '—' }}</td>
                   <td class="px-4 py-3 text-stone-600 dark:text-stone-400">{{ m.rol?.nombre ?? '—' }}</td>
                   <td class="px-4 py-3">
                     @if (m.activo) {

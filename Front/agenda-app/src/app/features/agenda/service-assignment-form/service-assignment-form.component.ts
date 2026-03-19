@@ -18,6 +18,7 @@ import { ServicioCancionService, ServicioCancion } from '../../../core/services/
 import { CancionService, Cancion } from '../../../core/services/cancion.service';
 import { Member } from '../../../core/services/member.service';
 import { AGENDA_SLOTS, SLOT_COLORS } from '../agenda-slots';
+import { DevocionalService, DevocionalDto } from '../../../core/services/devocional.service';
 
 type SlotState = {
   label: string;
@@ -47,12 +48,14 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   @Input() initialAsignaciones: Asignacion[] | null = null;
   /** Se emite cuando el usuario modifica miembros (asignar/quitar) o canciones (agregar/editar/eliminar) para que el padre recargue. */
   @Output() asignacionesChanged = new EventEmitter<void>();
+  /** Se emite cuando el usuario modifica el devocional para que el padre recargue. */
+  @Output() devocionalChanged = new EventEmitter<void>();
   /** Si el padre controla la pestaña (p. ej. en el modal), no se muestra la barra de pestañas aquí. */
-  activeTabInput = signal<'miembros' | 'canciones' | null>(null);
-  @Input() set activeTab(v: 'miembros' | 'canciones' | null) {
+  activeTabInput = signal<'miembros' | 'canciones' | 'devocional' | null>(null);
+  @Input() set activeTab(v: 'miembros' | 'canciones' | 'devocional' | null) {
     this.activeTabInput.set(v ?? null);
   }
-  @Output() tabChange = new EventEmitter<'miembros' | 'canciones'>();
+  @Output() tabChange = new EventEmitter<'miembros' | 'canciones' | 'devocional'>();
 
   servicioResolved = signal<Servicio | null>(null);
   asignaciones = signal<Asignacion[]>([]);
@@ -107,8 +110,25 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     }));
   });
 
+  devocionalesOpciones = computed(() => {
+    // Opciones = cualquier miembro asignado al servicio (da igual el rol).
+    const map = new Map<number, string>();
+    for (const a of this.asignaciones()) {
+      const id = a.miembroId;
+      const display = a.alias?.trim() || a.nombreCompleto;
+      map.set(id, display);
+    }
+    return Array.from(map.entries()).map(([miembroId, display]) => ({ miembroId, display }));
+  });
+
+  devocionalDisplay(): string {
+    const d = this.devocional();
+    if (!d || d.miembroId == null) return '—';
+    return d.miembroAlias?.trim() || d.miembroNombreCompleto?.trim() || '—';
+  }
+
   /** Pestaña activa cuando el componente la controla (sin input activeTab). */
-  internalTab = signal<'miembros' | 'canciones'>('miembros');
+  internalTab = signal<'miembros' | 'canciones' | 'devocional'>('miembros');
   /** Pestaña efectiva: la que viene del padre o la interna. */
   effectiveTab = computed(() => this.activeTabInput() ?? this.internalTab());
 
@@ -117,6 +137,11 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   savingCancion = signal(false);
   cancionError = signal<string | null>(null);
   editingCancionId = signal<number | null>(null);
+
+  devocional = signal<DevocionalDto | null>(null);
+  loadingDevocional = signal(false);
+  savingDevocional = signal(false);
+  devocionalError = signal<string | null>(null);
   /** Búsqueda en el catálogo de canciones. */
   catalogSearch$ = new Subject<string>();
   catalogResults = signal<Cancion[]>([]);
@@ -144,6 +169,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     private asignacionService: AsignacionService,
     private servicioCancionService: ServicioCancionService,
     private cancionService: CancionService,
+    private devocionalService: DevocionalService,
   ) {}
 
   /** Inicializa búsqueda de catálogo al escribir. */
@@ -189,11 +215,13 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
         this.asignaciones.set(this.initialAsignaciones);
         this.loading.set(false);
         this.loadCanciones();
+        this.loadDevocional();
         return;
       }
       this.loading.set(false);
       this.loadAsignaciones();
       this.loadCanciones();
+      this.loadDevocional();
       return;
     }
     this.loading.set(true);
@@ -203,6 +231,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
         this.loading.set(false);
         this.loadAsignaciones();
         this.loadCanciones();
+        this.loadDevocional();
       },
       error: () => {
         this.notFound.set(true);
@@ -289,10 +318,97 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     return this.selectingSlot() === slotIndex;
   }
 
-  setTab(tab: 'miembros' | 'canciones'): void {
+  setTab(tab: 'miembros' | 'canciones' | 'devocional'): void {
     this.internalTab.set(tab);
     this.tabChange.emit(tab);
     if (tab === 'canciones') this.loadCanciones();
+    if (tab === 'devocional') this.loadDevocional();
+  }
+
+  private loadDevocional(): void {
+    const id = this.servicioId;
+    if (id == null) return;
+    this.loadingDevocional.set(true);
+    this.devocionalError.set(null);
+    this.devocionalService.getByServicio(id).subscribe({
+      next: (dto) => {
+        this.devocional.set(dto);
+        this.loadingDevocional.set(false);
+      },
+      error: () => {
+        this.devocional.set({
+          servicioId: id,
+          miembroId: null,
+          miembroAlias: null,
+          miembroNombreCompleto: null,
+        });
+        this.loadingDevocional.set(false);
+      },
+    });
+  }
+
+  onDevocionalSelected(miembroId: number | null): void {
+    const id = this.servicioId;
+    if (id == null) return;
+    this.devocionalError.set(null);
+    this.savingDevocional.set(true);
+
+    if (miembroId == null) {
+      this.devocionalService.clearByServicio(id).subscribe({
+        next: () => {
+          this.savingDevocional.set(false);
+          this.loadDevocional();
+          this.devocionalChanged.emit();
+        },
+        error: () => {
+          this.savingDevocional.set(false);
+          this.devocionalError.set('No se pudo quitar el encargado del devocional.');
+        },
+      });
+      return;
+    }
+
+    this.devocionalService.setByServicio(id, miembroId).subscribe({
+      next: (dto) => {
+        this.devocional.set(dto);
+        this.savingDevocional.set(false);
+        this.devocionalChanged.emit();
+      },
+      error: (err) => {
+        this.savingDevocional.set(false);
+        const payload = err?.error;
+        const status = typeof err?.status === 'number' ? ` (HTTP ${err.status})` : '';
+
+        let msg = 'No se pudo guardar el devocional.';
+        if (typeof payload === 'string' && payload.trim()) {
+          msg = payload.trim();
+        } else if (payload && typeof payload === 'object') {
+          const candidate =
+            payload['message'] ??
+            payload['error'] ??
+            payload['detail'] ??
+            payload['msg'];
+          if (typeof candidate === 'string' && candidate.trim()) {
+            msg = candidate.trim();
+          } else {
+            // Fallback: mostramos el payload para diagnosticar.
+            try {
+              msg = `Error del servidor: ${JSON.stringify(payload)}`;
+            } catch {
+              // ignore
+            }
+          }
+        }
+
+        // HTTP 0 suele significar que el navegador bloqueó la llamada (frecuente: CORS/preflight).
+        if (err?.status === 0) {
+          this.devocionalError.set(`No se recibió respuesta del servidor. Probable CORS/preflight. (HTTP 0)`);
+          return;
+        }
+
+        this.devocionalError.set(`${msg}${status}`);
+      },
+    });
   }
 
   loadCanciones(): void {

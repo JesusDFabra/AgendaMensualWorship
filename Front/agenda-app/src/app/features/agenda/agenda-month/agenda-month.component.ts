@@ -9,12 +9,14 @@ import { ServicioCancionService, ServicioCancion } from '../../../core/services/
 import { ServiceAssignmentFormComponent } from '../service-assignment-form/service-assignment-form.component';
 import { AGENDA_SLOTS } from '../agenda-slots';
 import { AdminAuthService } from '../../../core/services/admin-auth.service';
+import { DevocionalService, DevocionalDto } from '../../../core/services/devocional.service';
 
 type DayWithAsignaciones = {
   servicio: Servicio;
   asignaciones: Asignacion[];
   slots: { label: string; nombre: string | null; nombreCompleto: string | null }[];
   canciones: ServicioCancion[];
+  devocional: DevocionalDto | null;
 };
 
 @Component({
@@ -30,7 +32,7 @@ export class AgendaMonthComponent implements OnInit {
   servicesInMonth = signal<DayWithAsignaciones[]>([]);
   loading = signal(true);
   selectedServicio = signal<Servicio | null>(null);
-  modalTab = signal<'miembros' | 'canciones'>('miembros');
+  modalTab = signal<'miembros' | 'canciones' | 'devocional'>('miembros');
   /** Asignaciones ya cargadas del mes; se pasan al modal para no volver a pedirlas. */
   selectedInitialAsignaciones = signal<Asignacion[] | null>(null);
   /** True si en el modal se modificaron miembros o canciones; solo entonces recargamos el mes al cerrar. */
@@ -54,6 +56,7 @@ export class AgendaMonthComponent implements OnInit {
     private servicioService: ServicioService,
     private asignacionService: AsignacionService,
     private servicioCancionService: ServicioCancionService,
+    private devocionalService: DevocionalService,
     public adminAuth: AdminAuthService,
   ) {}
 
@@ -89,15 +92,36 @@ export class AgendaMonthComponent implements OnInit {
         }
         forkJoin(inMonth.map(s => this.asignacionService.getAsignaciones(s.id))).subscribe({
           next: (asignacionesArrays) => {
-            const result: DayWithAsignaciones[] = inMonth.map((servicio, i) => ({
+            const base: DayWithAsignaciones[] = inMonth.map((servicio, i) => ({
               servicio,
               asignaciones: asignacionesArrays[i] ?? [],
               slots: this.asignacionesToSlots(asignacionesArrays[i] ?? []),
               canciones: [],
+              devocional: null,
             }));
-            this.servicesInMonth.set(result);
-            this.loading.set(false);
-            this.loadCancionesForMonth(inMonth);
+
+            forkJoin(
+              inMonth.map((s) =>
+                this.devocionalService.getByServicio(s.id).pipe(
+                  catchError(() =>
+                    of<DevocionalDto>({
+                      servicioId: s.id,
+                      miembroId: null,
+                      miembroAlias: null,
+                      miembroNombreCompleto: null,
+                    }),
+                  ),
+                ),
+              ),
+            ).subscribe({
+              next: (devocionales) => {
+                const updated = base.map((d, i) => ({ ...d, devocional: devocionales[i] ?? null }));
+                this.servicesInMonth.set(updated);
+                this.loading.set(false);
+                this.loadCancionesForMonth(inMonth);
+              },
+              error: () => this.loading.set(false),
+            });
           },
           error: () => this.loading.set(false),
         });
@@ -173,7 +197,7 @@ export class AgendaMonthComponent implements OnInit {
     this.selectedInitialAsignaciones.set(day.asignaciones);
   }
 
-  setModalTab(tab: 'miembros' | 'canciones'): void {
+  setModalTab(tab: 'miembros' | 'canciones' | 'devocional'): void {
     this.modalTab.set(tab);
   }
 

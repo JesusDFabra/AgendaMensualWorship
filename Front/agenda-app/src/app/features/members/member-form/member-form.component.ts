@@ -107,7 +107,8 @@ export class MemberFormComponent implements OnInit {
   private patchFormFromMember(m: Member): void {
     this.nombre = m.nombre ?? '';
     this.apellido = m.apellido ?? '';
-    this.alias = m.alias ?? null;
+    const rawAlias = m.alias ?? null;
+    this.alias = rawAlias && rawAlias.trim() ? rawAlias : null;
     this.identificacion = m.identificacion ?? '';
     this.fecNacimiento = m.fecNacimiento ?? '';
     this.parseFecNacimiento(this.fecNacimiento);
@@ -167,7 +168,8 @@ export class MemberFormComponent implements OnInit {
         id: this.memberId,
         nombre: this.nombre.trim(),
         apellido: this.apellido.trim(),
-        alias: this.alias?.trim() || null,
+        // alias opcional: si viene vacío mandamos '' (no null) para evitar restricciones de BD
+        alias: this.alias?.trim() || '',
         identificacion: this.identificacion.trim(),
         fecNacimiento: this.fecNacimiento,
         sexo: this.sexoId != null ? { id: this.sexoId, descripcion: '' } : null,
@@ -193,7 +195,8 @@ export class MemberFormComponent implements OnInit {
     const payload: CreateMemberPayload = {
       nombre: this.nombre.trim(),
       apellido: this.apellido.trim(),
-      alias: this.alias?.trim() || null,
+      // alias opcional: si viene vacío mandamos '' (no null) para evitar restricciones de BD
+      alias: this.alias?.trim() || '',
       identificacion: this.identificacion.trim(),
       fecNacimiento: this.fecNacimiento,
       sexo: this.sexoId != null ? { id: this.sexoId } : null,

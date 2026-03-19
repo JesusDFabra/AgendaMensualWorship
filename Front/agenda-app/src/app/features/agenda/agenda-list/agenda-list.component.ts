@@ -20,7 +20,7 @@ export class AgendaListComponent implements OnInit {
   /** Modal de asignación: al elegir un día con servicio */
   selectedServicio = signal<Servicio | null>(null);
   /** Pestaña activa en el modal (siempre visible en la cabecera) */
-  modalTab = signal<'miembros' | 'canciones'>('miembros');
+  modalTab = signal<'miembros' | 'canciones' | 'devocional'>('miembros');
   /** Si hubo cambios en el modal (miembros o canciones) para recargar al cerrar */
   hasChangesInModal = false;
 
@@ -131,7 +131,7 @@ export class AgendaListComponent implements OnInit {
     this.hasChangesInModal = true;
   }
 
-  setModalTab(tab: 'miembros' | 'canciones'): void {
+  setModalTab(tab: 'miembros' | 'canciones' | 'devocional'): void {
     this.modalTab.set(tab);
   }
 

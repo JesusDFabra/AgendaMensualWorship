@@ -49,6 +49,20 @@
             [class.dark:hover:bg-stone-700]="effectiveTab() !== 'canciones'">
       Canciones
     </button>
+    <button type="button"
+            (click)="setTab('devocional')"
+            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            [class.bg-white]="effectiveTab() === 'devocional'"
+            [class.dark:bg-stone-700]="effectiveTab() === 'devocional'"
+            [class.text-amber-700]="effectiveTab() === 'devocional'"
+            [class.dark:text-amber-300]="effectiveTab() === 'devocional'"
+            [class.shadow-sm]="effectiveTab() === 'devocional'"
+            [class.text-stone-600]="effectiveTab() !== 'devocional'"
+            [class.dark:text-stone-400]="effectiveTab() !== 'devocional'"
+            [class.hover:bg-stone-200]="effectiveTab() !== 'devocional'"
+            [class.dark:hover:bg-stone-700]="effectiveTab() !== 'devocional'">
+      Devocional
+    </button>
   </nav>
   }
 
@@ -311,6 +325,52 @@
           </li>
         }
       </ul>
+    }
+  </section>
+  } @else if (effectiveTab() === 'devocional') {
+  <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden p-4">
+    <h3 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">
+      Devocional
+    </h3>
+
+    @if (loadingDevocional()) {
+      <p class="text-sm text-stone-500 dark:text-stone-400">Cargando…</p>
+    } @else {
+      <p class="text-sm text-stone-600 dark:text-stone-300 mb-4">
+        Encargado del devocional: <span class="font-semibold text-amber-700 dark:text-amber-300">{{ devocionalDisplay() }}</span>
+      </p>
+
+      @if (!readOnlySignal()) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+          <div>
+            <label for="devocional-miembro" class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              Elegir encargado
+            </label>
+            <select id="devocional-miembro"
+                    name="devocionalMiembro"
+                    [ngModel]="devocional()?.miembroId ?? null"
+                    (ngModelChange)="onDevocionalSelected($event)"
+                    class="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 px-3 py-2 text-stone-800 dark:text-stone-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              <option [ngValue]="null">— Sin asignar —</option>
+              @for (o of devocionalesOpciones(); track o.miembroId) {
+                <option [ngValue]="o.miembroId">{{ o.display }}</option>
+              }
+            </select>
+          </div>
+
+          @if (devocionalError()) {
+            <p class="text-sm text-red-600 dark:text-red-400 sm:mt-0">{{ devocionalError() }}</p>
+          } @else {
+            <div class="sm:mt-0 text-sm text-stone-500 dark:text-stone-400">
+              {{ devocionalesOpciones().length === 0 ? 'Asigna miembros primero en la pestaña Miembros.' : 'Selecciona un miembro agendado para el devocional.' }}
+            </div>
+          }
+        </div>
+
+        @if (savingDevocional()) {
+          <p class="text-sm text-stone-500 dark:text-stone-400 mt-3">Guardando…</p>
+        }
+      }
     }
   </section>
   }
