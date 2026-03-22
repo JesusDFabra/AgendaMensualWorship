@@ -12,7 +12,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { ServicioService, Servicio } from '../../../core/services/servicio.service';
+import { PaletaColores, ServicioService, Servicio } from '../../../core/services/servicio.service';
+import { PaletaColoresService } from '../../../core/services/paleta-colores.service';
 import { AsignacionService, Asignacion } from '../../../core/services/asignacion.service';
 import { ServicioCancionService, ServicioCancion } from '../../../core/services/servicio-cancion.service';
 import { CancionService, Cancion } from '../../../core/services/cancion.service';
@@ -50,12 +51,14 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   @Output() asignacionesChanged = new EventEmitter<void>();
   /** Se emite cuando el usuario modifica el devocional para que el padre recargue. */
   @Output() devocionalChanged = new EventEmitter<void>();
+  /** Se emite cuando el usuario asigna o quita la paleta de colores. */
+  @Output() paletaChanged = new EventEmitter<void>();
   /** Si el padre controla la pestaña (p. ej. en el modal), no se muestra la barra de pestañas aquí. */
-  activeTabInput = signal<'miembros' | 'canciones' | 'devocional' | null>(null);
-  @Input() set activeTab(v: 'miembros' | 'canciones' | 'devocional' | null) {
+  activeTabInput = signal<'miembros' | 'canciones' | 'devocional' | 'paleta' | null>(null);
+  @Input() set activeTab(v: 'miembros' | 'canciones' | 'devocional' | 'paleta' | null) {
     this.activeTabInput.set(v ?? null);
   }
-  @Output() tabChange = new EventEmitter<'miembros' | 'canciones' | 'devocional'>();
+  @Output() tabChange = new EventEmitter<'miembros' | 'canciones' | 'devocional' | 'paleta'>();
 
   servicioResolved = signal<Servicio | null>(null);
   asignaciones = signal<Asignacion[]>([]);
@@ -128,7 +131,12 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   }
 
   /** Pestaña activa cuando el componente la controla (sin input activeTab). */
-  internalTab = signal<'miembros' | 'canciones' | 'devocional'>('miembros');
+  internalTab = signal<'miembros' | 'canciones' | 'devocional' | 'paleta'>('miembros');
+
+  paletas = signal<PaletaColores[]>([]);
+  loadingPaletas = signal(false);
+  savingPaleta = signal(false);
+  paletaError = signal<string | null>(null);
   /** Pestaña efectiva: la que viene del padre o la interna. */
   effectiveTab = computed(() => this.activeTabInput() ?? this.internalTab());
 
@@ -170,6 +178,7 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     private servicioCancionService: ServicioCancionService,
     private cancionService: CancionService,
     private devocionalService: DevocionalService,
+    private paletaColoresService: PaletaColoresService,
   ) {}
 
   /** Inicializa búsqueda de catálogo al escribir. */
@@ -202,12 +211,16 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     if (changes['activeTab'] && this.activeTabInput() === 'canciones') {
       this.loadCanciones();
     }
+    if (changes['activeTab'] && this.activeTabInput() === 'paleta') {
+      this.loadPaletas();
+    }
   }
 
   private resolveServicioAndLoad(): void {
     const id = this.servicioId;
     if (id == null) return;
     this.closeSelector();
+    this.paletas.set([]);
     if (this.servicio) {
       this.notFound.set(false);
       this.servicioResolved.set(this.servicio);
@@ -318,11 +331,65 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
     return this.selectingSlot() === slotIndex;
   }
 
-  setTab(tab: 'miembros' | 'canciones' | 'devocional'): void {
+  setTab(tab: 'miembros' | 'canciones' | 'devocional' | 'paleta'): void {
     this.internalTab.set(tab);
     this.tabChange.emit(tab);
     if (tab === 'canciones') this.loadCanciones();
     if (tab === 'devocional') this.loadDevocional();
+    if (tab === 'paleta') this.loadPaletas();
+  }
+
+  private loadPaletas(): void {
+    if (this.loadingPaletas()) {
+      return;
+    }
+    this.loadingPaletas.set(true);
+    this.paletaError.set(null);
+    this.paletaColoresService.getAll().subscribe({
+      next: (list) => {
+        this.paletas.set(list);
+        this.loadingPaletas.set(false);
+      },
+      error: (err) => {
+        this.loadingPaletas.set(false);
+        const status = err?.status;
+        if (status === 404) {
+          this.paletaError.set(
+            'El servidor no tiene el endpoint de paletas (404). Despliega el backend actualizado en Render o usa la URL de API en local.',
+          );
+        } else if (status === 0) {
+          this.paletaError.set(
+            'No se pudo conectar con el servidor (o CORS bloqueó la llamada). Comprueba la API y el despliegue.',
+          );
+        } else {
+          this.paletaError.set('No se pudieron cargar las paletas de colores.');
+        }
+      },
+    });
+  }
+
+  /** Fuerza recarga de la lista (p. ej. al abrir la pestaña desde el padre). */
+  refreshPaletasList(): void {
+    this.paletas.set([]);
+    this.loadPaletas();
+  }
+
+  onPaletaSelected(paletaId: number | null): void {
+    const id = this.servicioId;
+    if (id == null || this.readOnlySignal()) return;
+    this.paletaError.set(null);
+    this.savingPaleta.set(true);
+    this.servicioService.setPaleta(id, paletaId).subscribe({
+      next: (s) => {
+        this.servicioResolved.set(s);
+        this.savingPaleta.set(false);
+        this.paletaChanged.emit();
+      },
+      error: () => {
+        this.savingPaleta.set(false);
+        this.paletaError.set('No se pudo guardar la paleta de colores.');
+      },
+    });
   }
 
   private loadDevocional(): void {

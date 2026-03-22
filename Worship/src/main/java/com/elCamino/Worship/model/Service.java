@@ -4,9 +4,12 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,6 +24,10 @@ public class Service {
 
     @Column(name = "creado_en")
     private LocalDate creadoEn;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "colors_id")
+    private PaletaColores paletaColores;
 
     public Long getId() {
         return id;
@@ -54,5 +61,11 @@ public class Service {
         this.creadoEn = creadoEn;
     }
 
+    public PaletaColores getPaletaColores() {
+        return paletaColores;
+    }
 
+    public void setPaletaColores(PaletaColores paletaColores) {
+        this.paletaColores = paletaColores;
+    }
 }

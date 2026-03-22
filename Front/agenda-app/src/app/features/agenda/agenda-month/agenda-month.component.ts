@@ -10,6 +10,7 @@ import { ServiceAssignmentFormComponent } from '../service-assignment-form/servi
 import { AGENDA_SLOTS } from '../agenda-slots';
 import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { DevocionalService, DevocionalDto } from '../../../core/services/devocional.service';
+import { paletteToHexArray } from '../palette-util';
 
 type DayWithAsignaciones = {
   servicio: Servicio;
@@ -32,7 +33,7 @@ export class AgendaMonthComponent implements OnInit {
   servicesInMonth = signal<DayWithAsignaciones[]>([]);
   loading = signal(true);
   selectedServicio = signal<Servicio | null>(null);
-  modalTab = signal<'miembros' | 'canciones' | 'devocional'>('miembros');
+  modalTab = signal<'miembros' | 'canciones' | 'devocional' | 'paleta'>('miembros');
   /** Asignaciones ya cargadas del mes; se pasan al modal para no volver a pedirlas. */
   selectedInitialAsignaciones = signal<Asignacion[] | null>(null);
   /** True si en el modal se modificaron miembros o canciones; solo entonces recargamos el mes al cerrar. */
@@ -197,8 +198,13 @@ export class AgendaMonthComponent implements OnInit {
     this.selectedInitialAsignaciones.set(day.asignaciones);
   }
 
-  setModalTab(tab: 'miembros' | 'canciones' | 'devocional'): void {
+  setModalTab(tab: 'miembros' | 'canciones' | 'devocional' | 'paleta'): void {
     this.modalTab.set(tab);
+  }
+
+  /** Colores para los 4 cuadros de la tarjeta (null = transparente). */
+  swatchesForServicio(s: Servicio): (string | null)[] {
+    return paletteToHexArray(s.paletaColores);
   }
 
   closeModal(): void {
@@ -213,6 +219,13 @@ export class AgendaMonthComponent implements OnInit {
 
   onAsignacionesChanged(): void {
     this.hasChangesInModal = true;
+  }
+
+  /** Oculta Voz 4 y Voz 5 cuando están vacías en Agenda Mensual. */
+  shouldShowMonthlySlot(slot: { label: string; nombre: string | null }): boolean {
+    const isOptionalVoice = slot.label === 'Voz 4' || slot.label === 'Voz 5';
+    if (!isOptionalVoice) return true;
+    return !!slot.nombre?.trim();
   }
 
   /** Texto directores para una canción del servicio. */

@@ -2,6 +2,7 @@ package com.elCamino.Worship.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.elCamino.Worship.model.PaletaColores;
 import com.elCamino.Worship.model.Service;
+import com.elCamino.Worship.repository.PaletaColoresRepository;
 import com.elCamino.Worship.repository.ServiceRepository;
 
 @RestController
@@ -23,10 +26,11 @@ import com.elCamino.Worship.repository.ServiceRepository;
 public class ServiceController {
 
     private final ServiceRepository repository;
+    private final PaletaColoresRepository paletaColoresRepository;
 
-    // Constructor manual
-    public ServiceController(ServiceRepository repository) {
+    public ServiceController(ServiceRepository repository, PaletaColoresRepository paletaColoresRepository) {
         this.repository = repository;
+        this.paletaColoresRepository = paletaColoresRepository;
     }
 
     @GetMapping
@@ -68,6 +72,32 @@ public class ServiceController {
                     return ResponseEntity.ok(saved);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Asigna o quita la paleta de colores del servicio. Body: { "paletaId": 1 } o { "paletaId": null }.
+     */
+    @PutMapping("/{id}/paleta")
+    public ResponseEntity<Service> setPaletaColores(@PathVariable Long id, @RequestBody PaletaServicioBody body) {
+        Optional<Service> opt = repository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Service existing = opt.get();
+        if (body == null || body.paletaId == null) {
+            existing.setPaletaColores(null);
+        } else {
+            Optional<PaletaColores> paletaOpt = paletaColoresRepository.findById(body.paletaId);
+            if (paletaOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            existing.setPaletaColores(paletaOpt.get());
+        }
+        return ResponseEntity.ok(repository.save(existing));
+    }
+
+    public static final class PaletaServicioBody {
+        public Long paletaId;
     }
 
     @DeleteMapping("/{id}")

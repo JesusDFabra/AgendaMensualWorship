@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ServicioService, Servicio } from '../../../core/services/servicio.service';
+import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { ServiceAssignmentFormComponent } from '../service-assignment-form/service-assignment-form.component';
 
 type DayCell = { day: number | null; dateStr: string | null; servicio: Servicio | null };
@@ -20,7 +21,7 @@ export class AgendaListComponent implements OnInit {
   /** Modal de asignación: al elegir un día con servicio */
   selectedServicio = signal<Servicio | null>(null);
   /** Pestaña activa en el modal (siempre visible en la cabecera) */
-  modalTab = signal<'miembros' | 'canciones' | 'devocional'>('miembros');
+  modalTab = signal<'miembros' | 'canciones' | 'devocional' | 'paleta'>('miembros');
   /** Si hubo cambios en el modal (miembros o canciones) para recargar al cerrar */
   hasChangesInModal = false;
 
@@ -69,7 +70,10 @@ export class AgendaListComponent implements OnInit {
 
   weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-  constructor(private servicioService: ServicioService) {}
+  constructor(
+    private servicioService: ServicioService,
+    public adminAuth: AdminAuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadServices();
@@ -131,7 +135,7 @@ export class AgendaListComponent implements OnInit {
     this.hasChangesInModal = true;
   }
 
-  setModalTab(tab: 'miembros' | 'canciones' | 'devocional'): void {
+  setModalTab(tab: 'miembros' | 'canciones' | 'devocional' | 'paleta'): void {
     this.modalTab.set(tab);
   }
 

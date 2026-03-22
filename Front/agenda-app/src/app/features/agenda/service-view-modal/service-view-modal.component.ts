@@ -7,6 +7,7 @@ import { AsignacionService, Asignacion } from '../../../core/services/asignacion
 import { ServicioCancionService, ServicioCancion } from '../../../core/services/servicio-cancion.service';
 import { AGENDA_SLOTS, SLOT_COLORS } from '../agenda-slots';
 import { DevocionalService, DevocionalDto } from '../../../core/services/devocional.service';
+import { paletteToHexArray } from '../palette-util';
 
 type SlotState = {
   label: string;
@@ -120,5 +121,16 @@ export class ServiceViewModalComponent implements OnChanges {
     const d = this.devocional();
     if (!d || d.miembroId == null) return '—';
     return d.miembroAlias?.trim() || d.miembroNombreCompleto?.trim() || '—';
+  }
+
+  swatchesForServicio(s: Servicio): (string | null)[] {
+    return paletteToHexArray(s.paletaColores);
+  }
+
+  /** Oculta Voz 4 y Voz 5 cuando no tienen asignación. */
+  shouldShowViewSlot(slot: SlotState): boolean {
+    const isOptionalVoice = slot.label === 'Voz 4' || slot.label === 'Voz 5';
+    if (!isOptionalVoice) return true;
+    return !!slot.asignacion;
   }
 }

@@ -63,6 +63,20 @@
             [class.dark:hover:bg-stone-700]="effectiveTab() !== 'devocional'">
       Devocional
     </button>
+    <button type="button"
+            (click)="setTab('paleta')"
+            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            [class.bg-white]="effectiveTab() === 'paleta'"
+            [class.dark:bg-stone-700]="effectiveTab() === 'paleta'"
+            [class.text-amber-700]="effectiveTab() === 'paleta'"
+            [class.dark:text-amber-300]="effectiveTab() === 'paleta'"
+            [class.shadow-sm]="effectiveTab() === 'paleta'"
+            [class.text-stone-600]="effectiveTab() !== 'paleta'"
+            [class.dark:text-stone-400]="effectiveTab() !== 'paleta'"
+            [class.hover:bg-stone-200]="effectiveTab() !== 'paleta'"
+            [class.dark:hover:bg-stone-700]="effectiveTab() !== 'paleta'">
+      Paleta de colores
+    </button>
   </nav>
   }
 
@@ -370,6 +384,56 @@
         @if (savingDevocional()) {
           <p class="text-sm text-stone-500 dark:text-stone-400 mt-3">Guardando…</p>
         }
+      }
+    }
+  </section>
+  } @else if (effectiveTab() === 'paleta') {
+  <section class="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm overflow-hidden p-4">
+    <h3 class="text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">
+      Paleta de colores
+    </h3>
+    <p class="text-sm text-stone-600 dark:text-stone-400 mb-4">
+      Elige una combinación de 4 colores para este servicio. Se guarda al instante.
+    </p>
+
+    @if (loadingPaletas()) {
+      <p class="text-sm text-stone-500 dark:text-stone-400">Cargando paletas…</p>
+    } @else if (paletaError()) {
+      <p class="text-sm text-red-600 dark:text-red-400">{{ paletaError() }}</p>
+    } @else {
+      @if (!readOnlySignal() && servicioResolved()?.paletaColores?.id) {
+        <button type="button"
+                (click)="onPaletaSelected(null)"
+                [disabled]="savingPaleta()"
+                class="mb-4 rounded-lg border border-stone-300 dark:border-stone-500 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:opacity-50">
+          Quitar paleta
+        </button>
+      }
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        @for (pal of paletas(); track pal.id) {
+          <button type="button"
+                  (click)="onPaletaSelected(pal.id)"
+                  [disabled]="readOnlySignal() || savingPaleta()"
+                  [attr.aria-pressed]="servicioResolved()?.paletaColores?.id === pal.id"
+                  class="rounded-xl border-2 p-2 transition-colors text-left disabled:opacity-50
+                         border-stone-200 dark:border-stone-600 hover:border-amber-400 dark:hover:border-amber-500
+                         focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  [class.ring-2]="servicioResolved()?.paletaColores?.id === pal.id"
+                  [class.ring-amber-500]="servicioResolved()?.paletaColores?.id === pal.id"
+                  [class.border-amber-500]="servicioResolved()?.paletaColores?.id === pal.id">
+            <div class="flex gap-1 min-h-[2rem]">
+              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color1"></span>
+              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color2"></span>
+              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color3"></span>
+              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color4"></span>
+            </div>
+          </button>
+        }
+      </div>
+
+      @if (savingPaleta()) {
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-3">Guardando…</p>
       }
     }
   </section>
