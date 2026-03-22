@@ -99,11 +99,11 @@
               <span class="text-xl leading-none" aria-hidden="true">×</span>
             </button>
           </div>
-          <nav class="flex gap-2 px-4 py-3 bg-stone-100 dark:bg-stone-700/50 border-t border-stone-200 dark:border-stone-600"
+          <nav class="flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-stone-100 dark:bg-stone-700/50 border-t border-stone-200 dark:border-stone-600"
                aria-label="Secciones del servicio">
             <button type="button"
                     (click)="setModalTab('miembros')"
-                    class="px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border-2 min-w-[7rem]"
+                    class="min-w-0 flex-1 basis-[calc(50%-0.2rem)] sm:basis-0 sm:min-w-0 px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-semibold rounded-lg transition-colors border-2"
                     [class.bg-amber-500]="modalTab() === 'miembros'"
                     [class.text-white]="modalTab() === 'miembros'"
                     [class.border-amber-500]="modalTab() === 'miembros'"
@@ -117,7 +117,7 @@
             </button>
             <button type="button"
                     (click)="setModalTab('canciones')"
-                    class="px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border-2 min-w-[7rem]"
+                    class="min-w-0 flex-1 basis-[calc(50%-0.2rem)] sm:basis-0 sm:min-w-0 px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-semibold rounded-lg transition-colors border-2"
                     [class.bg-amber-500]="modalTab() === 'canciones'"
                     [class.text-white]="modalTab() === 'canciones'"
                     [class.border-amber-500]="modalTab() === 'canciones'"
@@ -131,7 +131,7 @@
             </button>
             <button type="button"
                     (click)="setModalTab('devocional')"
-                    class="px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border-2 min-w-[7rem]"
+                    class="min-w-0 flex-1 basis-[calc(50%-0.2rem)] sm:basis-0 sm:min-w-0 px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-semibold rounded-lg transition-colors border-2"
                     [class.bg-amber-500]="modalTab() === 'devocional'"
                     [class.text-white]="modalTab() === 'devocional'"
                     [class.border-amber-500]="modalTab() === 'devocional'"
@@ -145,7 +145,7 @@
             </button>
             <button type="button"
                     (click)="setModalTab('paleta')"
-                    class="px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border-2 min-w-[7rem]"
+                    class="min-w-0 flex-1 basis-[calc(50%-0.2rem)] sm:basis-0 sm:min-w-0 px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-semibold rounded-lg transition-colors border-2"
                     [class.bg-amber-500]="modalTab() === 'paleta'"
                     [class.text-white]="modalTab() === 'paleta'"
                     [class.border-amber-500]="modalTab() === 'paleta'"

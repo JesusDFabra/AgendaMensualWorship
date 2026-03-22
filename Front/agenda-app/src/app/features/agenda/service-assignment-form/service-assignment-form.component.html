@@ -19,11 +19,11 @@
   }
 
   @if (activeTabInput() == null) {
-  <nav class="flex flex-shrink-0 gap-1 mb-4 p-1 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-100 dark:bg-stone-800/80"
+  <nav class="grid grid-cols-2 sm:flex sm:flex-nowrap sm:flex-shrink-0 gap-1 mb-4 p-1 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-100 dark:bg-stone-800/80"
        aria-label="Secciones del servicio">
     <button type="button"
             (click)="setTab('miembros')"
-            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            class="min-w-0 w-full sm:w-auto sm:flex-1 px-2 py-1.5 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-medium rounded-lg transition-colors"
             [class.bg-white]="effectiveTab() === 'miembros'"
             [class.dark:bg-stone-700]="effectiveTab() === 'miembros'"
             [class.text-amber-700]="effectiveTab() === 'miembros'"
@@ -37,7 +37,7 @@
     </button>
     <button type="button"
             (click)="setTab('canciones')"
-            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            class="min-w-0 w-full sm:w-auto sm:flex-1 px-2 py-1.5 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-medium rounded-lg transition-colors"
             [class.bg-white]="effectiveTab() === 'canciones'"
             [class.dark:bg-stone-700]="effectiveTab() === 'canciones'"
             [class.text-amber-700]="effectiveTab() === 'canciones'"
@@ -51,7 +51,7 @@
     </button>
     <button type="button"
             (click)="setTab('devocional')"
-            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            class="min-w-0 w-full sm:w-auto sm:flex-1 px-2 py-1.5 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-medium rounded-lg transition-colors"
             [class.bg-white]="effectiveTab() === 'devocional'"
             [class.dark:bg-stone-700]="effectiveTab() === 'devocional'"
             [class.text-amber-700]="effectiveTab() === 'devocional'"
@@ -65,7 +65,7 @@
     </button>
     <button type="button"
             (click)="setTab('paleta')"
-            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+            class="min-w-0 w-full sm:w-auto sm:flex-1 px-2 py-1.5 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-medium rounded-lg transition-colors"
             [class.bg-white]="effectiveTab() === 'paleta'"
             [class.dark:bg-stone-700]="effectiveTab() === 'paleta'"
             [class.text-amber-700]="effectiveTab() === 'paleta'"
