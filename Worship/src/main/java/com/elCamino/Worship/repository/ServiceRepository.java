@@ -7,4 +7,5 @@ import com.elCamino.Worship.model.Service;
 
 public interface ServiceRepository extends JpaRepository<Service, Long> {
 
+    boolean existsByPaletaColores_Id(Long paletaId);
 }

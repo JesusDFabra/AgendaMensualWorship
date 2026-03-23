@@ -401,36 +401,140 @@
     } @else if (paletaError()) {
       <p class="text-sm text-red-600 dark:text-red-400">{{ paletaError() }}</p>
     } @else {
-      @if (!readOnlySignal() && servicioResolved()?.paletaColores?.id) {
-        <button type="button"
-                (click)="onPaletaSelected(null)"
-                [disabled]="savingPaleta()"
-                class="mb-4 rounded-lg border border-stone-300 dark:border-stone-500 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:opacity-50">
-          Quitar paleta
-        </button>
+      @if (!readOnlySignal()) {
+        <div class="mb-4 flex flex-wrap gap-2">
+          @if (servicioResolved()?.paletaColores?.id) {
+            <button type="button"
+                    (click)="onPaletaSelected(null)"
+                    [disabled]="savingPaleta()"
+                    class="rounded-lg border border-stone-300 dark:border-stone-500 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:opacity-50">
+              Quitar paleta del servicio
+            </button>
+          }
+          <button type="button"
+                  (click)="startCreatePaleta()"
+                  [disabled]="savingPaleta()"
+                  class="rounded-lg border border-amber-500 dark:border-amber-400 px-3 py-1.5 text-sm font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-50">
+            Nueva paleta
+          </button>
+        </div>
       }
 
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
         @for (pal of paletas(); track pal.id) {
-          <button type="button"
-                  (click)="onPaletaSelected(pal.id)"
-                  [disabled]="readOnlySignal() || savingPaleta()"
-                  [attr.aria-pressed]="servicioResolved()?.paletaColores?.id === pal.id"
-                  class="rounded-xl border-2 p-2 transition-colors text-left disabled:opacity-50
-                         border-stone-200 dark:border-stone-600 hover:border-amber-400 dark:hover:border-amber-500
-                         focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  [class.ring-2]="servicioResolved()?.paletaColores?.id === pal.id"
-                  [class.ring-amber-500]="servicioResolved()?.paletaColores?.id === pal.id"
-                  [class.border-amber-500]="servicioResolved()?.paletaColores?.id === pal.id">
-            <div class="flex gap-1 min-h-[2rem]">
-              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color1"></span>
-              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color2"></span>
-              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color3"></span>
-              <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color4"></span>
-            </div>
-          </button>
+          <div class="rounded-xl border-2 p-2 transition-colors
+                      border-stone-200 dark:border-stone-600 hover:border-amber-400 dark:hover:border-amber-500"
+               [class.ring-2]="servicioResolved()?.paletaColores?.id === pal.id"
+               [class.ring-amber-500]="servicioResolved()?.paletaColores?.id === pal.id"
+               [class.border-amber-500]="servicioResolved()?.paletaColores?.id === pal.id">
+            <button type="button"
+                    (click)="onPaletaSelected(pal.id)"
+                    [disabled]="readOnlySignal() || savingPaleta()"
+                    [attr.aria-pressed]="servicioResolved()?.paletaColores?.id === pal.id"
+                    class="w-full">
+              <div class="flex gap-1 min-h-[2rem]">
+                <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color1"></span>
+                <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color2"></span>
+                <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color3"></span>
+                <span class="flex-1 rounded-md border border-stone-300/60 dark:border-stone-600/80 min-h-[2rem]" [style.background-color]="pal.color4"></span>
+              </div>
+            </button>
+            @if (!readOnlySignal()) {
+              <div class="mt-2 flex items-center justify-end gap-2">
+                <button type="button"
+                        (click)="startEditPaleta(pal)"
+                        [disabled]="savingPaleta() || deletingPaletaId() === pal.id"
+                        class="text-xs text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 disabled:opacity-50">
+                  Editar
+                </button>
+                @if (confirmDeletePaletaId() === pal.id) {
+                  <button type="button"
+                          (click)="deletePaleta(pal.id)"
+                          [disabled]="savingPaleta() || deletingPaletaId() === pal.id"
+                          class="text-xs text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 disabled:opacity-50">
+                    {{ deletingPaletaId() === pal.id ? 'Eliminando…' : 'Confirmar' }}
+                  </button>
+                  <button type="button"
+                          (click)="cancelDeletePaleta()"
+                          [disabled]="deletingPaletaId() === pal.id"
+                          class="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 disabled:opacity-50">
+                    Cancelar
+                  </button>
+                } @else {
+                  <button type="button"
+                          (click)="requestDeletePaleta(pal.id)"
+                          [disabled]="savingPaleta() || deletingPaletaId() === pal.id"
+                          class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:opacity-50">
+                    Eliminar
+                  </button>
+                }
+              </div>
+            }
+          </div>
         }
       </div>
+
+      @if (!readOnlySignal() && (creatingPaleta() || editingPaletaId() !== null)) {
+        <div class="mt-4 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-700/20 p-3">
+          <h4 class="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
+            {{ editingPaletaId() !== null ? 'Editar paleta' : 'Nueva paleta' }}
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label for="paleta-color1" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Color 1</label>
+              <input id="paleta-color1"
+                     type="color"
+                     [ngModel]="paletaForm().color1"
+                     (ngModelChange)="patchPaletaForm({ color1: $event })"
+                     class="p-1 h-10 w-14 block bg-layer border border-stone-300 dark:border-stone-600 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none" />
+            </div>
+            <div>
+              <label for="paleta-color2" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Color 2</label>
+              <input id="paleta-color2"
+                     type="color"
+                     [ngModel]="paletaForm().color2"
+                     (ngModelChange)="patchPaletaForm({ color2: $event })"
+                     class="p-1 h-10 w-14 block bg-layer border border-stone-300 dark:border-stone-600 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none" />
+            </div>
+            <div>
+              <label for="paleta-color3" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Color 3</label>
+              <input id="paleta-color3"
+                     type="color"
+                     [ngModel]="paletaForm().color3"
+                     (ngModelChange)="patchPaletaForm({ color3: $event })"
+                     class="p-1 h-10 w-14 block bg-layer border border-stone-300 dark:border-stone-600 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none" />
+            </div>
+            <div>
+              <label for="paleta-color4" class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Color 4</label>
+              <input id="paleta-color4"
+                     type="color"
+                     [ngModel]="paletaForm().color4"
+                     (ngModelChange)="patchPaletaForm({ color4: $event })"
+                     class="p-1 h-10 w-14 block bg-layer border border-stone-300 dark:border-stone-600 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none" />
+            </div>
+          </div>
+          <div class="mt-3 flex items-center gap-2">
+            <button type="button"
+                    (click)="savePaletaForm()"
+                    [disabled]="savingPaleta()"
+                    class="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50">
+              {{ savingPaleta() ? 'Guardando…' : 'Guardar paleta' }}
+            </button>
+            <button type="button"
+                    (click)="cancelPaletaForm()"
+                    [disabled]="savingPaleta()"
+                    class="rounded-lg border border-stone-300 dark:border-stone-500 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 disabled:opacity-50">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (paletas().length === 0) {
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-4">
+          No hay paletas creadas. Usa «Nueva paleta» para agregar la primera.
+        </p>
+      }
 
       @if (savingPaleta()) {
         <p class="text-sm text-stone-500 dark:text-stone-400 mt-3">Guardando…</p>

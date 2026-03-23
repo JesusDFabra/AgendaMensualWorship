@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { PaletaColores, ServicioService, Servicio } from '../../../core/services/servicio.service';
-import { PaletaColoresService } from '../../../core/services/paleta-colores.service';
+import { PaletaColoresBody, PaletaColoresService } from '../../../core/services/paleta-colores.service';
 import { AsignacionService, Asignacion } from '../../../core/services/asignacion.service';
 import { ServicioCancionService, ServicioCancion } from '../../../core/services/servicio-cancion.service';
 import { CancionService, Cancion } from '../../../core/services/cancion.service';
@@ -137,6 +137,16 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   loadingPaletas = signal(false);
   savingPaleta = signal(false);
   paletaError = signal<string | null>(null);
+  creatingPaleta = signal(false);
+  editingPaletaId = signal<number | null>(null);
+  deletingPaletaId = signal<number | null>(null);
+  confirmDeletePaletaId = signal<number | null>(null);
+  paletaForm = signal<PaletaColoresBody>({
+    color1: '#1c1917',
+    color2: '#1e3a8a',
+    color3: '#0369a1',
+    color4: '#67e8f9',
+  });
   /** Pestaña efectiva: la que viene del padre o la interna. */
   effectiveTab = computed(() => this.activeTabInput() ?? this.internalTab());
 
@@ -372,6 +382,98 @@ export class ServiceAssignmentFormComponent implements OnInit, OnChanges {
   refreshPaletasList(): void {
     this.paletas.set([]);
     this.loadPaletas();
+  }
+
+  startCreatePaleta(): void {
+    this.creatingPaleta.set(true);
+    this.editingPaletaId.set(null);
+    this.paletaError.set(null);
+    this.paletaForm.set({
+      color1: '#1c1917',
+      color2: '#1e3a8a',
+      color3: '#0369a1',
+      color4: '#67e8f9',
+    });
+  }
+
+  startEditPaleta(p: PaletaColores): void {
+    this.creatingPaleta.set(false);
+    this.editingPaletaId.set(p.id);
+    this.paletaError.set(null);
+    this.paletaForm.set({
+      color1: p.color1,
+      color2: p.color2,
+      color3: p.color3,
+      color4: p.color4,
+    });
+  }
+
+  cancelPaletaForm(): void {
+    this.creatingPaleta.set(false);
+    this.editingPaletaId.set(null);
+    this.paletaError.set(null);
+  }
+
+  patchPaletaForm(partial: Partial<PaletaColoresBody>): void {
+    this.paletaForm.set({ ...this.paletaForm(), ...partial });
+  }
+
+  savePaletaForm(): void {
+    if (this.readOnlySignal()) return;
+    const body = this.paletaForm();
+    this.paletaError.set(null);
+    this.savingPaleta.set(true);
+    const editId = this.editingPaletaId();
+    const req$ = editId == null
+      ? this.paletaColoresService.create(body)
+      : this.paletaColoresService.update(editId, body);
+    req$.subscribe({
+      next: () => {
+        this.savingPaleta.set(false);
+        this.cancelPaletaForm();
+        this.refreshPaletasList();
+      },
+      error: (err) => {
+        this.savingPaleta.set(false);
+        this.paletaError.set(
+          typeof err?.error === 'string' && err.error.trim()
+            ? err.error
+            : 'No se pudo guardar la paleta.',
+        );
+      },
+    });
+  }
+
+  deletePaleta(paletaId: number): void {
+    if (this.readOnlySignal()) return;
+    this.paletaError.set(null);
+    this.deletingPaletaId.set(paletaId);
+    this.paletaColoresService.delete(paletaId).subscribe({
+      next: () => {
+        this.deletingPaletaId.set(null);
+        this.confirmDeletePaletaId.set(null);
+        if (this.editingPaletaId() === paletaId) {
+          this.cancelPaletaForm();
+        }
+        this.refreshPaletasList();
+      },
+      error: (err) => {
+        this.deletingPaletaId.set(null);
+        const msg = typeof err?.error === 'string' && err.error.trim()
+          ? err.error
+          : 'No se pudo eliminar la paleta.';
+        this.paletaError.set(msg);
+      },
+    });
+  }
+
+  requestDeletePaleta(paletaId: number): void {
+    if (this.readOnlySignal()) return;
+    this.confirmDeletePaletaId.set(paletaId);
+  }
+
+  cancelDeletePaleta(): void {
+    this.confirmDeletePaletaId.set(null);
   }
 
   onPaletaSelected(paletaId: number | null): void {
